@@ -13,7 +13,7 @@ class StaffController extends Controller
 {
     public function impersonate(User $user)
     {
-        if (auth()->user()->role !== 'admin' || $user->role === 'admin') {
+        if (!in_array(auth()->user()->role, ['admin', 'master']) || in_array($user->role, ['admin', 'master'])) {
             abort(403, 'Siz ushbu foydalanuvchi profiliga kiraolmaysiz.');
         }
         
@@ -30,15 +30,19 @@ class StaffController extends Controller
     {
         if (session()->has('impersonate_by')) {
             $adminId = session()->pull('impersonate_by');
-            $admin = User::find($adminId);
+            // Bypass global scopes just in case
+            $admin = User::withoutGlobalScopes()->find($adminId);
             
-            if ($admin && $admin->role === 'admin') {
+            if ($admin && in_array($admin->role, ['admin', 'master'])) {
                 auth()->login($admin);
-                return redirect()->route('admin.dashboard')->with('success', 'Admin profiliga qaytdingiz.');
+                session()->regenerate();
+                
+                $route = $admin->is_master ? 'master.dashboard' : 'admin.dashboard';
+                return redirect()->route($route)->with('success', 'Asosiy profilga qaytdingiz.');
             }
         }
         
-        return redirect()->route('login');
+        return redirect()->route('dashboard');
     }
 
     public function toggleBlock(User $user)

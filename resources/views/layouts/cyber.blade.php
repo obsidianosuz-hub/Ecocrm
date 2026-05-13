@@ -200,9 +200,9 @@
         <button @click="sidebarOpen = !sidebarOpen" class="text-white text-2xl hover:text-cyan-400 transition-colors">
             <i class="fa-solid fa-bars"></i>
         </button>
-        <div class="brand flex flex-col items-center" style="margin-bottom:0;">
+        <div class="brand" style="margin-bottom:0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             @if($companyLogo)
-                <img src="{{ $companyLogo }}" alt="Logo" class="h-6 object-contain">
+                <img src="{{ $companyLogo }}" alt="Logo" style="height: 24px; object-fit: contain; display: block;">
             @endif
             <span style="font-size: 14px;">{{ $companyName }}</span>
         </div>
@@ -230,11 +230,11 @@
 
     <!-- Sidebar Menu -->
     <aside class="sidebar glass-panel" :class="{'mobile-open': sidebarOpen}">
-        <div class="brand hidden lg:flex flex-col items-center justify-center gap-2 mt-4 mb-6">
+        <div class="brand hidden lg:block" style="margin-top: 10px; margin-bottom: 25px; text-align: center;">
             @if($companyLogo)
-                <img src="{{ $companyLogo }}" alt="Logo" class="h-10 object-contain">
+                <img src="{{ $companyLogo }}" alt="Logo" style="height: 40px; object-fit: contain; margin: 0 auto 8px auto; display: block;">
             @endif
-            <span class="text-sm font-bold tracking-widest">{{ $companyName }}</span>
+            <div style="font-size: 14px; font-weight: bold; letter-spacing: 2px;">{{ $companyName }}</div>
         </div>
         <button @click="sidebarOpen = false" class="lg:hidden absolute top-4 right-4 text-white/50 hover:text-white text-xl">
             <i class="fa-solid fa-xmark"></i>

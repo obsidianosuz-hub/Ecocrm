@@ -3,7 +3,7 @@
 <head>
     <title>Daily Report - {{ $date }}</title>
     <style>
-        body { font-family: sans-serif; font-size: 12px; color: #333; }
+        body { font-family: 'DejaVu Sans', sans-serif; font-size: 12px; color: #333; }
         .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
         .summary-box { background: #f4f4f4; padding: 15px; margin-bottom: 20px; border: 1px solid #ddd; }
         .summary-item { margin-bottom: 5px; }

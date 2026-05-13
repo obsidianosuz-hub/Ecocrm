@@ -160,35 +160,39 @@
 </div>
 
 @if($currentTab == 'dashboard')
-<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3 shrink-0">
+<div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-3 shrink-0">
     <!-- Shift Control Card (Compact) -->
     <div class="md:col-span-1 cyber-panel p-3 flex flex-col justify-center items-center border border-white/10 rounded-xl">
         @if(!$activeShift)
-            <button @click="initiateFaceID()" class="w-full py-2 bg-cyan-500 text-black font-black text-[9px] uppercase rounded-lg hover:bg-cyan-400 transition-all">START SHIFT</button>
+            <button @click="initiateFaceID()" class="w-full py-2 bg-cyan-500 text-black font-black text-[9px] uppercase rounded-lg hover:bg-cyan-400 transition-all">{{ __('messages.start_shift') ?? 'START SHIFT' }}</button>
         @else
             <div class="text-[9px] text-cyan-400 font-bold uppercase opacity-60 mb-1">Live: <span x-text="shiftDuration"></span></div>
             <div class="flex gap-1 w-full">
-                <button @click="showZReport = true" class="flex-1 py-1.5 bg-red-500/20 text-red-500 border border-red-500/30 text-[8px] font-black uppercase rounded">Z-REP</button>
+                <button @click="showZReport = true" class="flex-1 py-1.5 bg-red-500/20 text-red-500 border border-red-500/30 text-[8px] font-black uppercase rounded">{{ __('messages.z_report') ?? 'Z-REP' }}</button>
             </div>
         @endif
     </div>
 
     <!-- Stats Matrix (Mini) -->
     <div class="stat-card p-2 border-l-2 border-cyan-400 bg-white/5">
-        <div class="text-[8px] text-white/40 uppercase font-black">Daily Rev</div>
+        <div class="text-[8px] text-white/40 uppercase font-black">{{ __('messages.daily_rev') ?? 'Daily Rev' }}</div>
         <div class="text-base font-black text-white">{{ number_format($dailyReceipts, 0, ',', ' ') }}</div>
     </div>
     <div class="stat-card p-2 border-l-2 border-yellow-400 bg-white/5">
-        <div class="text-[8px] text-white/40 uppercase font-black">Net Profit</div>
+        <div class="text-[8px] text-white/40 uppercase font-black">{{ __('messages.net_profit') ?? 'Net Profit' }}</div>
         <div class="text-base font-black text-white">{{ number_format($dailyProfit, 0, ',', ' ') }}</div>
     </div>
     <div class="stat-card p-2 border-l-2 border-red-500 bg-white/5">
-        <div class="text-[8px] text-white/40 uppercase font-black">Exp/Out</div>
+        <div class="text-[8px] text-white/40 uppercase font-black">{{ __('messages.exp_out') ?? 'Exp/Out' }}</div>
         <div class="text-base font-black text-white">{{ number_format($manualExpenses, 0, ',', ' ') }}</div>
     </div>
     <div class="stat-card p-2 border-l-2 border-emerald-400 bg-white/5">
-        <div class="text-[8px] text-emerald-400 uppercase font-black">Vault</div>
+        <div class="text-[8px] text-emerald-400 uppercase font-black">{{ __('messages.vault') ?? 'Vault' }}</div>
         <div class="text-base font-black text-emerald-400">{{ number_format($vault, 0, ',', ' ') }}</div>
+    </div>
+    <div class="stat-card p-2 border-l-2 border-blue-400 bg-white/5">
+        <div class="text-[8px] text-blue-400 uppercase font-black">{{ __('messages.card_vault') ?? 'Card Vault' }}</div>
+        <div class="text-base font-black text-blue-400">{{ number_format($cardVault ?? 0, 0, ',', ' ') }}</div>
     </div>
 </div>
 
@@ -242,7 +246,7 @@
             </h2>
             <div class="relative w-full md:w-64">
                 <svg class="w-4 h-4 absolute left-3 top-2.5 text-[var(--active-color)] opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                <input type="text" x-model="searchQuery" @keydown.enter.prevent placeholder="Scan Barcode (Contract ID)" class="w-full bg-[var(--input-bg)] border border-[var(--border-color)] p-2 pl-9 text-[var(--text-color)] font-bold text-xs font-mono outline-none focus:border-[var(--active-color)] focus:shadow-[0_0_10px_rgba(0,255,0,0.2)] transition-all uppercase placeholder-[var(--text-color)] placeholder-opacity-50" autocomplete="off" name="barcode_scanner_unique">
+                <input type="text" x-model="searchQuery" @keydown.enter.prevent placeholder="{{ __('messages.scan_barcode') ?? 'Scan Barcode (Contract ID)' }}" class="w-full bg-[var(--input-bg)] border border-[var(--border-color)] p-2 pl-9 text-[var(--text-color)] font-bold text-xs font-mono outline-none focus:border-[var(--active-color)] focus:shadow-[0_0_10px_rgba(0,255,0,0.2)] transition-all uppercase placeholder-[var(--text-color)] placeholder-opacity-50" autocomplete="off" name="barcode_scanner_unique">
             </div>
         </div>
 
@@ -288,8 +292,8 @@
                              <div class="text-[9px] font-bold text-emerald-400 uppercase">Profit: {{ number_format($ct->amount - $ct->cost_price, 0, ',', ' ') }}</div>
                         </div>
                         <div class="flex gap-2">
-                            <button @click.prevent="handleContract({{ $ct->id }}, 'approve')" type="button" class="px-3 py-1.5 bg-cyan-500 text-black font-black text-[10px] uppercase rounded-lg hover:bg-cyan-400 transition-all shadow-lg shadow-cyan-500/10">Pass</button>
-                            <button @click.prevent="handleContract({{ $ct->id }}, 'reject')" type="button" class="px-3 py-1.5 border border-red-500/30 text-red-500 font-bold text-[10px] uppercase rounded-lg hover:bg-red-500 hover:text-white transition-all">Deny</button>
+                            <button @click.prevent="handleContract({{ $ct->id }}, 'approve')" type="button" class="px-3 py-1.5 bg-cyan-500 text-black font-black text-[10px] uppercase rounded-lg hover:bg-cyan-400 transition-all shadow-lg shadow-cyan-500/10">{{ __('messages.pass') ?? 'Pass' }}</button>
+                            <button @click.prevent="handleContract({{ $ct->id }}, 'reject')" type="button" class="px-3 py-1.5 border border-red-500/30 text-red-500 font-bold text-[10px] uppercase rounded-lg hover:bg-red-500 hover:text-white transition-all">{{ __('messages.deny') ?? 'Deny' }}</button>
                         </div>
                     </div>
                 </div>
@@ -314,24 +318,25 @@
                         <option value="income">{{ __('messages.type_income_cash') }}</option>
                         <option value="expense">{{ __('messages.type_expense_office') }}</option>
                         <option value="tech_expense">{{ __('messages.type_expense_dev') }}</option>
-                        <option value="salary_payout" class="text-green-500">💰 Oylik Berish (Salary)</option>
-                        <option value="commission_payout" class="text-blue-500">📈 Foiz Ulushi (Commission)</option>
-                        <option value="staff_loan" class="text-red-500">🏦 Qarz Berish (Loan)</option>
+                        <option value="salary_payout" class="text-green-500">💰 {{ __('messages.salary_payout') ?? 'Oylik Berish (Salary)' }}</option>
+                        <option value="commission_payout" class="text-blue-500">📈 {{ __('messages.commission_payout') ?? 'Avans (Commission)' }}</option>
+                        <option value="staff_loan" class="text-red-500">🏦 {{ __('messages.staff_loan') ?? 'Qarz Berish (Loan)' }}</option>
+                        <option value="transport_expense" class="text-yellow-500">🚕 {{ __('messages.transport_expense') ?? 'Yo\'l Haqi (Kompaniyadan)' }}</option>
                     </select>
 
                     <div x-show="['salary_payout', 'commission_payout', 'staff_loan'].includes(manualType)" x-transition class="space-y-2">
                         <select name="staff_id" class="w-full bg-black text-[var(--cyber-yellow)] border border-[var(--cyber-yellow)] p-2 text-sm font-bold outline-none">
-                            <option value="">-- Xodimni Tanlang --</option>
+                            <option value="">-- {{ __('messages.select_staff') ?? 'Xodimni Tanlang' }} --</option>
                             @foreach($allStaff as $staff)
-                                <option value="{{ $staff->id }}">{{ $staff->name }} ({{ $staff->role }})</option>
+                                <option value="{{ $staff->id }}">{{ $staff->name }} ({{ $staff->role }}) - Balans: {{ number_format($staff->balance, 0, ',', ' ') }}</option>
                             @endforeach
                         </select>
                     </div>
 
                     <select name="payment_method" required class="w-full bg-[var(--input-bg)] text-[var(--text-color)] border border-[var(--border-color)] p-2 text-xs font-bold focus:outline-none focus:border-[var(--active-color)] transition-colors appearance-none font-mono mt-2">
-                        <option value="" disabled selected>-- To'lov usuli --</option>
-                        <option value="cash">💵 Naqd</option>
-                        <option value="card">💳 Karta (Kartani to'ldirish/yechish)</option>
+                        <option value="" disabled selected>-- {{ __('messages.payment_method') ?? 'To\'lov usuli' }} --</option>
+                        <option value="cash">💵 {{ __('messages.cash') ?? 'Naqd' }}</option>
+                        <option value="card">💳 {{ __('messages.card') ?? 'Karta' }}</option>
                     </select>
 
                     <input type="number" name="amount" required placeholder="{{ __('messages.amount_uzs') }}" class="w-full bg-[var(--input-bg)] text-[var(--text-color)] placeholder-[var(--text-color)] placeholder-opacity-70 border border-[var(--border-color)] p-2 text-xs font-bold focus:outline-none focus:border-[var(--active-color)] transition-colors font-mono">

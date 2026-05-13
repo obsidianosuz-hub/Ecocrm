@@ -12,7 +12,7 @@ class TransactionController extends Controller
     public function storeManual(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:income,expense,tech_expense,salary_payout,commission_payout,staff_loan',
+            'type' => 'required|in:income,expense,tech_expense,salary_payout,commission_payout,staff_loan,transport_expense',
             'payment_method' => 'required|in:cash,card',
             'amount' => 'required|numeric|min:1',
             'description' => 'required|string|max:255',
@@ -29,12 +29,10 @@ class TransactionController extends Controller
                 if ($request->type === 'salary_payout') {
                     $user->salary -= $request->amount;
                     $finalDescription = "PAYROLL (SALARY) TO {$user->name}: " . $request->description;
-                } elseif ($request->type === 'commission_payout') {
+                } elseif (in_array($request->type, ['commission_payout', 'staff_loan'])) {
+                    // deduct from balance. if balance is 0 or less, it naturally becomes negative (debt).
                     $user->balance -= $request->amount;
-                    $finalDescription = "PAYROLL (COMMISSION) TO {$user->name}: " . $request->description;
-                } elseif ($request->type === 'staff_loan') {
-                    $user->debt += $request->amount;
-                    $finalDescription = "LOAN (QARZ) TO {$user->name}: " . $request->description;
+                    $finalDescription = "PAYOUT/AVANS TO {$user->name}: " . $request->description;
                 }
                 $user->save();
             }

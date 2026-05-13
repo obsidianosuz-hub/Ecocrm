@@ -12,9 +12,14 @@
 
 @section('content')
 <div class="mb-6 flex justify-between items-end border-b border-[var(--active-color)] pb-4">
-    <div>
-        <h1 class="text-3xl font-orbitron font-bold tracking-widest text-[var(--active-color)]">TO'LOV GRAFIGI</h1>
-        <p class="font-mono text-sm opacity-70 mt-1">#QARZ-{{ $debt->id }} | Mijoz: {{ $debt->client->name }}</p>
+    <div class="flex items-center gap-4">
+        <button onclick="window.history.back()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-[var(--active-color)] hover:border-[var(--active-color)] transition-all shrink-0">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div>
+            <h1 class="text-3xl font-orbitron font-bold tracking-widest text-[var(--active-color)]">TO'LOV GRAFIGI</h1>
+            <p class="font-mono text-sm opacity-70 mt-1">#QARZ-{{ $debt->id }} | Mijoz: {{ $debt->client->name }}</p>
+        </div>
     </div>
     <div class="flex gap-4">
         <a href="{{ route('admin.clients.index') }}" class="px-6 py-2 border border-gray-700 text-gray-400 font-bold font-orbitron uppercase tracking-widest hover:bg-gray-900 transition-all">

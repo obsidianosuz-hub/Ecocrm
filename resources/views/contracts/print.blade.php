@@ -160,14 +160,23 @@
         </div>
 
         <div class="info-block">
-            <div class="row">
-                <span class="label">XIZMAT:</span>
-                <span class="value" style="font-size: 14px;">{{ $contract->service->name ?? $contract->custom_type }}</span>
-            </div>
-            <div class="row">
-                <span class="label">KATEGORIYA:</span>
-                <span class="value">{{ $contract->custom_type }}</span>
-            </div>
+            @if($contract->services_json && is_array($contract->services_json))
+                @foreach($contract->services_json as $item)
+                    <div class="row">
+                        <span class="label" style="font-size: 10px;">{{ $item['name'] }}:</span>
+                        <span class="value">{{ number_format($item['price'], 0, '.', ' ') }} UZS</span>
+                    </div>
+                @endforeach
+            @else
+                <div class="row">
+                    <span class="label">XIZMAT:</span>
+                    <span class="value" style="font-size: 14px;">{{ $contract->service->name ?? $contract->custom_type }}</span>
+                </div>
+                <div class="row">
+                    <span class="label">KATEGORIYA:</span>
+                    <span class="value">{{ $contract->custom_type }}</span>
+                </div>
+            @endif
             <div class="divider"></div>
             <div class="row">
                 <span class="label">MIJOZ:</span>

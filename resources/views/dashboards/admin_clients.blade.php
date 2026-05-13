@@ -12,9 +12,14 @@
 
 @section('content')
 <div class="mb-6 flex justify-between items-end border-b border-[var(--active-color)] pb-4">
-    <div>
-        <h1 class="text-3xl font-orbitron font-bold tracking-widest text-[var(--active-color)]">MIJOZLAR BAZASI</h1>
-        <p class="font-mono text-sm opacity-70 mt-1">Mijozlar ro'yxati, hisob-kitoblar va qarzlar boshqaruvi</p>
+    <div class="flex items-center gap-4">
+        <button onclick="window.history.back()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-[var(--active-color)] hover:border-[var(--active-color)] transition-all shrink-0">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div>
+            <h1 class="text-xl md:text-3xl font-orbitron font-bold tracking-widest text-[var(--active-color)]">MIJOZLAR BAZASI</h1>
+            <p class="font-mono text-sm opacity-70 mt-1">Mijozlar ro'yxati, hisob-kitoblar va qarzlar boshqaruvi</p>
+        </div>
     </div>
     <button @click="$dispatch('open-client-modal')" class="px-6 py-2 bg-[var(--active-color)] text-black font-bold font-orbitron uppercase tracking-widest shadow-[0_0_15px_var(--active-color)] hover:scale-105 transition-all">
         + YANGI MIJOZ

@@ -41,10 +41,23 @@
         }
     });
 </script>
-<div class="mb-6 flex justify-between items-end border-b border-[var(--active-color)] pb-4">
-    <div>
-        <h1 class="text-3xl font-orbitron font-bold tracking-widest text-[var(--active-color)]">{{ __('messages.finance_ledger') }}</h1>
-        <p class="font-mono text-sm opacity-70 mt-1">{{ __('messages.finance_desc') }}</p>
+<div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-[var(--active-color)] pb-4 gap-4">
+    <div class="flex items-center gap-4">
+        <button onclick="window.history.back()" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-[var(--active-color)] hover:border-[var(--active-color)] transition-all shrink-0">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div>
+            <h1 class="text-xl md:text-3xl font-orbitron font-bold tracking-widest text-[var(--active-color)] uppercase">{{ __('messages.finance_ledger') }}</h1>
+            <p class="font-mono text-xs md:text-sm opacity-70 mt-1">{{ __('messages.finance_desc') }}</p>
+        </div>
+    </div>
+    <div class="flex flex-wrap gap-2">
+        <a href="{{ route('reports.transactions') }}" class="px-3 py-2 bg-purple-500/20 text-purple-400 border border-purple-500/40 hover:bg-purple-500 hover:text-black transition-all font-bold text-[10px] uppercase tracking-widest">
+            <i class="fa-solid fa-file-pdf mr-2"></i> EXPORT FCC HUB
+        </a>
+        <a href="{{ route('reports.clients') }}" class="px-3 py-2 bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 hover:bg-cyan-500 hover:text-black transition-all font-bold text-[10px] uppercase tracking-widest">
+            <i class="fa-solid fa-file-pdf mr-2"></i> EXPORT CLIENTS
+        </a>
     </div>
 </div>
 

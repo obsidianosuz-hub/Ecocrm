@@ -12,17 +12,14 @@ class ContractController extends Controller
 {
     public function store(Request $request)
     {
-        // Ensure the AJAX request doesn't get redirected on validation error by using Response JSON
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'service_name' => 'required|string|max:255',
-            'custom_type' => 'required|string|max:255',
             'client_name' => 'required|string|max:255',
             'client_phone' => 'required|string|max:255',
             'client_address' => 'required|string|max:255',
             'client_id' => 'nullable|exists:clients,id',
+            'payment_method' => 'required|in:cash,card',
+            'services_json' => 'required|string', // Comes as JSON string from Alpine
             'amount' => 'required|numeric|min:0',
-            'cost_price' => 'nullable|numeric|min:0',
-            'operator_share_percentage' => 'nullable|numeric|min:0|max:100',
             'pfc_file' => 'nullable|file',
         ]);
 
@@ -31,46 +28,54 @@ class ContractController extends Controller
         }
 
         $validated = $validator->validated();
-        $customTypeLower = strtolower(trim($validated['custom_type']));
+        $items = json_decode($validated['services_json'], true);
 
-        if (str_contains($customTypeLower, 'imzo') && !$request->hasFile('pfc_file')) {
+        // Validation for E-imzo requirements
+        $hasImzo = false;
+        foreach($items as $item) {
+            if (str_contains(strtolower($item['type']), 'imzo')) $hasImzo = true;
+        }
+
+        if ($hasImzo && !$request->hasFile('pfc_file')) {
             return response()->json(['success' => false, 'message' => 'E-imzo xizmati bo\'lganda buyurtma fayli (.pfx) kiritilishi majburiy!'], 422);
         }
 
-        if ($request->hasFile('pfc_file')) {
-            $extension = strtolower($request->file('pfc_file')->getClientOriginalExtension());
-            if (str_contains($customTypeLower, 'imzo') && $extension !== 'pfx') {
-                return response()->json(['success' => false, 'message' => 'E-imzo xizmati uchun fayl formati faqat .pfx bo\'lishi shart!'], 422);
-            }
-        }
+        // Use the first service as the primary one for legacy table structure
+        $primaryService = $items[0] ?? ['name' => 'Multiple Services', 'type' => 'General', 'cost' => 0, 'price' => 0];
 
-        // Find existing service or create a new "Custom" one with default 10% operator share
         $service = \App\Models\Service::firstOrCreate(
-            ['name' => $validated['service_name']],
+            ['name' => $primaryService['name']],
             [
-                'type' => 'Custom',
-                'cost_price' => 0,
-                'client_price' => $validated['amount'],
-                'operator_share_percentage' => 10
+                'type' => $primaryService['type'],
+                'cost_price' => $primaryService['cost'] ?? 0,
+                'client_price' => $primaryService['price'] ?? 0,
+                'operator_share_percentage' => 10,
+                'company_id' => auth()->user()->company_id
             ]
         );
 
-        // Client linkage logic
         $client = null;
         if (!empty($validated['client_id'])) {
             $client = \App\Models\Client::find($validated['client_id']);
         } else {
-            // Try to find by name and phone to avoid duplicates
             $client = \App\Models\Client::firstOrCreate(
                 ['phone' => $validated['client_phone']],
                 [
                     'name' => $validated['client_name'],
-                    'address' => $validated['client_address']
+                    'address' => $validated['client_address'],
+                    'company_id' => auth()->user()->company_id
                 ]
             );
         }
 
+        // Calculate total cost_price from all items
+        $totalCost = 0;
+        foreach($items as $it) {
+            $totalCost += (float)($it['cost'] ?? 0);
+        }
+
         $contractData = [
+            'company_id' => auth()->user()->company_id,
             'user_id' => auth()->id(),
             'service_id' => $service->id,
             'client_id' => $client ? $client->id : null,
@@ -78,11 +83,13 @@ class ContractController extends Controller
             'client_phone' => $validated['client_phone'],
             'client_address' => $validated['client_address'],
             'amount' => $validated['amount'],
-            'cost_price' => $validated['cost_price'] ?? 0,
-            'operator_share_percentage' => $validated['operator_share_percentage'] ?? 0,
-            'custom_type' => $validated['custom_type'],
+            'cost_price' => $totalCost,
+            'payment_method' => $validated['payment_method'],
+            'operator_share_percentage' => 10, // Default for now
+            'custom_type' => count($items) > 1 ? 'Multiple Services' : $primaryService['type'],
+            'services_json' => $items,
             'status' => 'pending',
-            'contract_id' => 'REQ-' . rand(10000, 99999) . '-' . \Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(3)), 
+            'contract_id' => 'REQ-' . rand(1000, 9999) . '-' . strtoupper(Str::random(4)), 
         ];
 
         if ($request->hasFile('pfc_file')) {
@@ -95,11 +102,7 @@ class ContractController extends Controller
 
         Contract::create($contractData);
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['message' => 'Contract routed to Treasury.', 'success' => true]);
-        }
-
-        return redirect()->back()->with('success', 'Contract routed to Treasury.');
+        return response()->json(['message' => 'Shartnoma kassaga yo\'naltirildi.', 'success' => true]);
     }
 
     public function approve(Request $request, Contract $contract)
@@ -110,14 +113,29 @@ class ContractController extends Controller
 
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
-            // Create transaction
+            // Kassir hududidagi asosiy to'lov (karta yoki naqd)
+            $paymentMethod = $request->input('payment_method', $contract->payment_method);
+            
             Transaction::create([
                 'user_id' => auth()->id(),
                 'contract_id' => $contract->id,
                 'type' => 'income',
                 'amount' => $contract->amount,
+                'payment_method' => $paymentMethod,
                 'description' => 'Payment for ' . $contract->contract_id,
             ]);
+
+            // Davlatga xizmat tannarxini to'lash - buni darhol kartadan yechib olamiz
+            if ($contract->cost_price > 0) {
+                Transaction::create([
+                    'user_id' => auth()->id(),
+                    'contract_id' => $contract->id,
+                    'type' => 'expense',
+                    'amount' => $contract->cost_price,
+                    'payment_method' => 'card', // Cost price is always deducted from card 
+                    'description' => 'State service fee deduction for ' . $contract->contract_id,
+                ]);
+            }
 
             // Calculate operator percentage from COMPANY PROFIT and add to balance
             if ($contract->operator_share_percentage > 0) {
@@ -140,7 +158,11 @@ class ContractController extends Controller
                 }
             }
 
-            $contract->update(['status' => 'approved']);
+            $contract->update([
+                'status' => 'approved', 
+                'payment_method' => $paymentMethod
+            ]);
+            
             \Illuminate\Support\Facades\DB::commit();
 
             if ($request->ajax() || $request->wantsJson()) {

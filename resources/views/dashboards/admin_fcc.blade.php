@@ -42,9 +42,14 @@
     });
 </script>
 <div class="mb-6 flex justify-between items-end border-b border-[var(--active-color)] pb-4">
-    <div>
-        <h1 class="text-3xl font-orbitron font-bold tracking-widest text-[var(--active-color)]">{{ __('messages.fcc_hub_title') }}</h1>
-        <p class="font-mono text-sm opacity-70 mt-1">{{ __('messages.fcc_desc') }}</p>
+    <div class="flex items-center gap-4">
+        <button onclick="window.history.back()" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-[var(--active-color)] hover:border-[var(--active-color)] transition-all shrink-0">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div>
+            <h1 class="text-xl md:text-3xl font-orbitron font-bold tracking-widest text-[var(--active-color)]">{{ __('messages.fcc_hub_title') }}</h1>
+            <p class="font-mono text-sm opacity-70 mt-1">{{ __('messages.fcc_desc') }}</p>
+        </div>
     </div>
 </div>
 

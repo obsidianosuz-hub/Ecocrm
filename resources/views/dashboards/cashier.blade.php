@@ -152,67 +152,43 @@
 @endif
 <div x-data="cashierDashboard()" class="flex-1 min-h-0 flex flex-col h-full font-mono text-sm relative">
 
+<!-- Navigation Tabs (Compact) -->
+<div class="flex gap-2 mb-3 bg-black/40 p-1 rounded-xl border border-white/5 shrink-0">
+    <a href="{{ route('cashier.dashboard', ['tab' => 'dashboard']) }}" class="flex-1 py-1.5 px-3 rounded-lg text-center text-[10px] font-bold uppercase transition-all {{ $currentTab == 'dashboard' ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20' : 'text-white/40 hover:text-white hover:bg-white/5' }}">Command</a>
+    <a href="{{ route('cashier.dashboard', ['tab' => 'transactions']) }}" class="flex-1 py-1.5 px-3 rounded-lg text-center text-[10px] font-bold uppercase transition-all {{ $currentTab == 'transactions' ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20' : 'text-white/40 hover:text-white hover:bg-white/5' }}">History</a>
+    <a href="{{ route('cashier.dashboard', ['tab' => 'reports']) }}" class="flex-1 py-1.5 px-3 rounded-lg text-center text-[10px] font-bold uppercase transition-all {{ $currentTab == 'reports' ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20' : 'text-white/40 hover:text-white hover:bg-white/5' }}">Fleet</a>
+</div>
+
 @if($currentTab == 'dashboard')
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4 shrink-0 px-2 md:px-0">
-    <!-- Clock In Button & Vault -->
-    @if(!$activeShift)
-    <div @click="initiateFaceID()" class="cyber-panel p-6 flex flex-col justify-center items-center cursor-pointer hover:bg-[var(--active-color)] hover:text-[var(--bg-color)] transition-all group border-b-2 border-l-2 border-[var(--active-color)]">
-        <h3 class="text-xl font-orbitron font-bold text-[var(--active-color)] group-hover:text-[var(--bg-color)] uppercase">IYShNI BOSHLASH</h3>
-        <p class="text-sm opacity-70 mt-2 font-mono text-[var(--text-color)] group-hover:text-[var(--bg-color)]">BIOMETRIK AVTORIZATSIYA (FACE ID)</p>
+<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3 shrink-0">
+    <!-- Shift Control Card (Compact) -->
+    <div class="md:col-span-1 cyber-panel p-3 flex flex-col justify-center items-center border border-white/10 rounded-xl">
+        @if(!$activeShift)
+            <button @click="initiateFaceID()" class="w-full py-2 bg-cyan-500 text-black font-black text-[9px] uppercase rounded-lg hover:bg-cyan-400 transition-all">START SHIFT</button>
+        @else
+            <div class="text-[9px] text-cyan-400 font-bold uppercase opacity-60 mb-1">Live: <span x-text="shiftDuration"></span></div>
+            <div class="flex gap-1 w-full">
+                <button @click="showZReport = true" class="flex-1 py-1.5 bg-red-500/20 text-red-500 border border-red-500/30 text-[8px] font-black uppercase rounded">Z-REP</button>
+            </div>
+        @endif
     </div>
-    @else
-        <div class="cyber-panel p-6 flex flex-col justify-center items-center h-full relative border-b-2 border-l-2 border-[var(--active-color)]">
 
-            <h3 class="text-xs font-orbitron font-bold uppercase text-[var(--active-color)] opacity-70 mb-2">{{ __('messages.active_shift_running') ?? 'FAOL SMENA' }}</h3>
-            <!-- Auto-Calculated Running Timer -->
-            <div class="text-4xl md:text-5xl font-orbitron font-bold text-[var(--cyber-yellow)] mb-6 tracking-widest timer-display" x-text="shiftDuration" style="text-shadow: 0 0 20px rgba(252,238,10,0.5);">00:00:00</div>
-            
-            <div class="flex flex-col gap-2 w-full">
-                @if(auth()->user()->status === 'away')
-                    <form method="POST" action="{{ route('shift.resume') }}" class="w-full">
-                        @csrf
-                        <button type="submit" class="w-full py-2 border border-[var(--cyber-yellow)] text-[var(--cyber-yellow)] hover:bg-[var(--cyber-yellow)] hover:text-black uppercase font-bold tracking-widest text-xs transition-all">
-                            TANAFFUSNI YAKUNLASH
-                        </button>
-                    </form>
-                @else
-                    <form method="POST" action="{{ route('shift.pause') }}" class="w-full">
-                        @csrf
-                        <button type="submit" class="w-full py-2 border border-white text-white hover:bg-white hover:text-black uppercase font-bold tracking-widest text-xs transition-all">
-                            TANAFFUS (BREAK)
-                        </button>
-                    </form>
-                @endif
-
-                <button @click="showZReport = true" type="button" class="w-full py-3 px-4 bg-red-900 bg-opacity-20 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-500 shadow-[0_0_15px_rgba(255,0,0,0.2)] hover:shadow-none uppercase font-bold tracking-widest text-xs flex flex-col items-center justify-center gap-1 group">
-                    <span>{{ __('messages.end_shift') }} / Z-REPORT</span>
-                    <span class="text-xs font-mono opacity-80 group-hover:text-white text-[var(--text-color)]">{{ __('messages.disconnect_securely') }}</span>
-                </button>
-            </div>
-        </div>
-    @endif
-
-    <!-- Stats -->
-    <div class="md:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="cyber-panel p-4 border-b-2" style="border-bottom-color: var(--active-color);">
-            <h3 class="text-xs font-mono mb-1 opacity-80 text-[var(--active-color)] uppercase tracking-widest">{{ __('messages.daily_receipts') }}</h3>
-            <p class="text-xl font-orbitron font-bold text-[var(--active-color)]">{{ number_format($dailyReceipts, 0, ',', ' ') }} <span class="text-sm opacity-50 font-sans">UZS</span></p>
-        </div>
-        <div class="cyber-panel p-4 border-b-2" style="border-bottom-color: #fca311;">
-            <h3 class="text-xs font-mono mb-1 opacity-80 text-[#fca311] uppercase tracking-widest">KUNLIK SOF FOYDA</h3>
-            <p class="text-xl font-orbitron font-bold text-[#fca311]">{{ number_format($dailyProfit, 0, ',', ' ') }} <span class="text-sm opacity-50 font-sans">UZS</span></p>
-        </div>
-        <div class="cyber-panel p-4 border-b-2" style="border-bottom-color: #ef4444;">
-            <h3 class="text-xs font-mono mb-1 opacity-80 text-red-500 uppercase tracking-widest">KUNLIK CHIQIM</h3>
-            <p class="text-xl font-orbitron font-bold text-red-500">{{ number_format($manualExpenses, 0, ',', ' ') }} <span class="text-sm opacity-50 font-sans">UZS</span></p>
-        </div>
-        <div class="cyber-panel p-4 bg-[var(--active-color)] bg-opacity-10 border-b-2" style="border-bottom-color: var(--active-color);">
-            <h3 class="text-xs font-mono mb-1 opacity-100 uppercase tracking-widest text-[var(--active-color)]">KASSA QOLDIG'I (VAULT)</h3>
-            <div class="flex items-baseline justify-between">
-                <p class="text-xl font-orbitron font-bold text-[var(--active-color)]" style="text-shadow: 0 0 10px var(--active-color);">{{ number_format($vault, 0, ',', ' ') }}</p>
-                <span class="text-sm opacity-50 font-sans text-[var(--active-color)]">UZS</span>
-            </div>
-        </div>
+    <!-- Stats Matrix (Mini) -->
+    <div class="stat-card p-2 border-l-2 border-cyan-400 bg-white/5">
+        <div class="text-[8px] text-white/40 uppercase font-black">Daily Rev</div>
+        <div class="text-base font-black text-white">{{ number_format($dailyReceipts, 0, ',', ' ') }}</div>
+    </div>
+    <div class="stat-card p-2 border-l-2 border-yellow-400 bg-white/5">
+        <div class="text-[8px] text-white/40 uppercase font-black">Net Profit</div>
+        <div class="text-base font-black text-white">{{ number_format($dailyProfit, 0, ',', ' ') }}</div>
+    </div>
+    <div class="stat-card p-2 border-l-2 border-red-500 bg-white/5">
+        <div class="text-[8px] text-white/40 uppercase font-black">Exp/Out</div>
+        <div class="text-base font-black text-white">{{ number_format($manualExpenses, 0, ',', ' ') }}</div>
+    </div>
+    <div class="stat-card p-2 border-l-2 border-emerald-400 bg-white/5">
+        <div class="text-[8px] text-emerald-400 uppercase font-black">Vault</div>
+        <div class="text-base font-black text-emerald-400">{{ number_format($vault, 0, ',', ' ') }}</div>
     </div>
 </div>
 
@@ -240,12 +216,17 @@
             <div class="bg-red-500 bg-opacity-10 border border-red-500 border-opacity-30 p-3 text-sm text-red-500 text-center mb-6 uppercase tracking-widest">
                 KASSA PULINI SANAB TOPSHIRING VA CHIQUVCHI SIGNALNI KUTING.
             </div>
-            <div class="flex gap-4">
-                <button @click="showZReport = false" type="button" class="w-1/2 py-2 text-[var(--text-color)] hover:text-[var(--active-color)] hover:bg-gray-500 hover:bg-opacity-10 uppercase tracking-widest font-bold transition-all text-xs border border-gray-800">Bekor qilish</button>
-                <form method="POST" action="{{ route('shift.stop') }}" class="w-1/2">
-                    @csrf
-                    <button type="submit" class="w-full py-2 bg-red-600 border border-red-500 text-white font-bold uppercase tracking-widest text-xs hover:bg-red-700 transition-all shadow-[0_0_15px_rgba(255,0,0,0.3)]">Smenani Yopish</button>
-                </form>
+            <div class="flex flex-col gap-3">
+                <a href="{{ route('reports.daily') }}" class="w-full py-2 bg-blue-600/20 text-blue-400 border border-blue-500 font-bold text-[10px] uppercase tracking-widest text-center hover:bg-blue-600 hover:text-white transition-all">
+                    📥 KUNLIK PDF HISOBOTNI YUKLASH
+                </a>
+                <div class="flex gap-4">
+                    <button @click="showZReport = false" type="button" class="w-1/2 py-2 text-[var(--text-color)] hover:text-[var(--active-color)] hover:bg-gray-500 hover:bg-opacity-10 uppercase tracking-widest font-bold transition-all text-xs border border-gray-800">Bekor qilish</button>
+                    <form method="POST" action="{{ route('shift.stop') }}" class="w-1/2">
+                        @csrf
+                        <button type="submit" class="w-full py-2 bg-red-600 border border-red-500 text-white font-bold uppercase tracking-widest text-xs hover:bg-red-700 transition-all shadow-[0_0_15px_rgba(255,0,0,0.3)]">Smenani Yopish</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -276,27 +257,39 @@
             </div>
         @endif
 
-        <div class="space-y-3 font-mono w-full overflow-y-auto pr-2 slim-scroll">
+        <div class="space-y-2 font-mono w-full overflow-y-auto pr-1 slim-scroll">
             @forelse($pendingContracts as $ct)
-                <div x-show="searchQuery === '' || '{{ strtolower($ct->contract_id) }}'.includes(searchQuery.toLowerCase())" class="p-4 border border-[var(--active-color)] border-opacity-50 flex flex-col md:flex-row justify-between md:items-center group hover:bg-[var(--hover-bg)] transition-colors relative gap-4 rounded-sm">
-                    <div>
-                        <h3 class="font-bold text-base mb-1 uppercase tracking-widest text-[var(--active-color)]" style="text-shadow: 0 0 5px var(--active-color);">{{ $ct->contract_id }}: <span class="text-[var(--text-color)]">{{ $ct->service->name }}</span></h3>
-                        <p class="opacity-100 text-sm text-[var(--panel-bg)] bg-[var(--text-color)] p-1 rounded-sm inline-block font-bold">Op: {{ $ct->user->name }} • Client: {{ $ct->client_name }}</p>
-                        @if($ct->file_path)
-                            @php $ext = strtoupper(pathinfo($ct->file_path, PATHINFO_EXTENSION)); @endphp
-                            <a href="{{ route('contracts.download', $ct->id) }}" class="text-sm text-[var(--cyber-yellow)] underline font-bold mt-2 block">.{{ $ext ?: 'PFC' }} MA'LUMOTLARNI KO'RISH</a>
+                <div x-show="searchQuery === '' || '{{ strtolower($ct->contract_id) }}'.includes(searchQuery.toLowerCase())" class="p-3 border border-white/5 bg-white/5 flex flex-col md:flex-row justify-between md:items-center group hover:border-cyan-400/30 transition-all rounded-xl gap-3">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-[10px] font-black text-white/30 tracking-widest">{{ $ct->contract_id }}</span>
+                            <span class="text-[11px] font-bold text-cyan-400 uppercase">{{ $ct->service->name }}</span>
+                        </div>
+                        
+                        @if($ct->services_json && is_array($ct->services_json))
+                            <div class="space-y-1 bg-black/20 p-2 rounded-lg border border-white/5 mb-2">
+                                @foreach($ct->services_json as $item)
+                                    <div class="flex justify-between text-[10px] font-bold border-b border-white/5 pb-1 last:border-0 last:pb-0">
+                                        <span class="text-white/60 uppercase">{{ $item['name'] }}</span>
+                                        <span class="text-yellow-500">{{ number_format($item['price'], 0, ',', ' ') }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
                         @endif
+
+                        <div class="flex items-center gap-3 text-[9px] font-bold text-white/40 uppercase">
+                            <span>OP: {{ $ct->user->name }}</span>
+                            <span>CL: {{ $ct->client_name }}</span>
+                        </div>
                     </div>
-                    <div class="text-right flex flex-col items-end gap-2">
-                        <p class="font-bold text-xl text-[var(--active-color)]">{{ number_format($ct->amount, 0, ',', ' ') }} <span class="text-sm opacity-100 text-[var(--text-color)] font-normal">UZS</span></p>
-                        <p class="text-sm font-bold text-[var(--cyber-yellow)] opacity-80 uppercase">FOYDA: {{ number_format($ct->amount - $ct->cost_price, 0, ',', ' ') }} UZS</p>
-                        <div class="flex gap-2 justify-end">
-                            <button @click.prevent="handleContract({{ $ct->id }}, 'approve')" type="button" class="px-4 py-2 bg-[var(--active-color)] text-black font-bold text-sm uppercase tracking-widest border border-transparent hover:bg-transparent hover:text-[var(--active-color)] hover:border-[var(--active-color)] transition-all shadow-[0_0_15px_rgba(0,255,0,0.5)] hover:shadow-[0_0_20px_var(--active-color)]">
-                                {{ __('messages.verify_and_print') }}
-                            </button>
-                            <button @click.prevent="handleContract({{ $ct->id }}, 'reject')" type="button" class="px-3 py-2 text-red-500 font-bold text-sm uppercase hover:bg-red-500 hover:text-black transition-all border border-red-500 hover:border-red-500">
-                                {{ __('messages.reject') }}
-                            </button>
+                    <div class="text-right flex flex-col md:flex-row items-center gap-4">
+                        <div class="text-right">
+                             <div class="text-base font-black text-white">{{ number_format($ct->amount, 0, ',', ' ') }} <span class="text-[10px] opacity-40">UZS</span></div>
+                             <div class="text-[9px] font-bold text-emerald-400 uppercase">Profit: {{ number_format($ct->amount - $ct->cost_price, 0, ',', ' ') }}</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button @click.prevent="handleContract({{ $ct->id }}, 'approve')" type="button" class="px-3 py-1.5 bg-cyan-500 text-black font-black text-[10px] uppercase rounded-lg hover:bg-cyan-400 transition-all shadow-lg shadow-cyan-500/10">Pass</button>
+                            <button @click.prevent="handleContract({{ $ct->id }}, 'reject')" type="button" class="px-3 py-1.5 border border-red-500/30 text-red-500 font-bold text-[10px] uppercase rounded-lg hover:bg-red-500 hover:text-white transition-all">Deny</button>
                         </div>
                     </div>
                 </div>
@@ -334,6 +327,12 @@
                             @endforeach
                         </select>
                     </div>
+
+                    <select name="payment_method" required class="w-full bg-[var(--input-bg)] text-[var(--text-color)] border border-[var(--border-color)] p-2 text-xs font-bold focus:outline-none focus:border-[var(--active-color)] transition-colors appearance-none font-mono mt-2">
+                        <option value="" disabled selected>-- To'lov usuli --</option>
+                        <option value="cash">💵 Naqd</option>
+                        <option value="card">💳 Karta (Kartani to'ldirish/yechish)</option>
+                    </select>
 
                     <input type="number" name="amount" required placeholder="{{ __('messages.amount_uzs') }}" class="w-full bg-[var(--input-bg)] text-[var(--text-color)] placeholder-[var(--text-color)] placeholder-opacity-70 border border-[var(--border-color)] p-2 text-xs font-bold focus:outline-none focus:border-[var(--active-color)] transition-colors font-mono">
                     <textarea name="description" required placeholder="{{ __('messages.desc_admin_hash') }}" class="w-full bg-[var(--input-bg)] text-[var(--text-color)] placeholder-[var(--text-color)] placeholder-opacity-70 border border-[var(--border-color)] p-2 h-16 text-xs font-bold focus:outline-none focus:border-[var(--active-color)] transition-colors font-mono resize-none"></textarea>

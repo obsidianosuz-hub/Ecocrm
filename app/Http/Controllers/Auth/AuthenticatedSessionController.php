@@ -30,6 +30,20 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
         
+        if ($user->approval_status === 'pending') {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->withErrors(['email' => 'Sizning hisobingiz hali tasdiqlanmagan. Iltimos kuting.']);
+        }
+
+        if ($user->approval_status === 'rejected') {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->withErrors(['email' => 'Sizning arizangiz rad etilgan.']);
+        }
+
         if ($user->status === 'blocked') {
             Auth::guard('web')->logout();
             $request->session()->invalidate();
@@ -37,10 +51,12 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('login')->withErrors(['email' => 'Sizning hisobingiz administrator tomonidan BLOKLANGAN.']);
         }
         
+        if ($user->is_master) {
+            return redirect()->route('master.dashboard');
+        }
+
         if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
-        } elseif ($user->role === 'developer') {
-            return redirect()->route('developer.dashboard');
         } elseif ($user->role === 'cashier') {
             return redirect()->route('cashier.dashboard');
         }

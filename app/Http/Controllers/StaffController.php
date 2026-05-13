@@ -44,7 +44,7 @@ class StaffController extends Controller
     public function toggleBlock(User $user)
     {
         if (auth()->user()->role !== 'admin' || $user->id === auth()->id()) {
-            abort(403);
+            abort(403, 'Sizda ushbu amalni bajarish huquqi yo\'q yoki o\'zingizni bloklay olmaysiz.');
         }
         
         $user->status = $user->status === 'blocked' ? 'offline' : 'blocked';
@@ -63,20 +63,20 @@ class StaffController extends Controller
 
     public function index()
     {
-        if (auth()->user()->role !== 'admin') abort(403);
+        if (auth()->user()->role !== 'admin') abort(403, 'Faqat admin xodimlar ro\'yxatini ko\'ra oladi.');
         $users = User::with(['shifts.pauses'])->get();
         return view('dashboards.admin_staff', compact('users'));
     }
 
     public function store(Request $request)
     {
-        if (auth()->user()->role !== 'admin') abort(403);
+        if (auth()->user()->role !== 'admin') abort(403, 'Yangi xodim qo\'shish uchun admin ruxsati kerak.');
         
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|string|email|unique:users,email,NULL,id,deleted_at,NULL',
             'password' => 'required|string|min:4',
-            'role' => 'required|in:admin,operator,cashier,developer',
+            'role' => 'required|in:admin,operator,cashier,developer,teacher',
             'salary' => 'nullable|numeric',
             'bonus' => 'nullable|numeric',
             'work_start_time' => 'nullable',
@@ -126,13 +126,13 @@ class StaffController extends Controller
 
     public function update(Request $request, User $user)
     {
-        if (auth()->user()->role !== 'admin') abort(403);
+        if (auth()->user()->role !== 'admin') abort(403, 'Xodim ma\'lumotlarini tahrirlash uchun admin ruxsati kerak.');
         
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|string|email|unique:users,email,'.$user->id.',id,deleted_at,NULL',
             'password' => 'nullable|string|min:4',
-            'role' => 'required|in:admin,operator,cashier,developer',
+            'role' => 'required|in:admin,operator,cashier,developer,teacher',
             'work_start_time' => 'nullable',
             'work_end_time' => 'nullable',
             'allowed_ip' => 'nullable|string',
@@ -178,7 +178,7 @@ class StaffController extends Controller
 
     public function updatePayroll(Request $request, User $user)
     {
-        if (auth()->user()->role !== 'admin') abort(403);
+        if (auth()->user()->role !== 'admin') abort(403, 'Oylik va maoshlarni boshqarish uchun admin ruxsati kerak.');
 
         $request->validate([
             'salary' => 'nullable|numeric',
@@ -233,7 +233,7 @@ class StaffController extends Controller
 
     public function adjustBalance(Request $request, User $user)
     {
-        if (auth()->user()->role !== 'admin') abort(403);
+        if (auth()->user()->role !== 'admin') abort(403, 'Balans va qarzlarni tahrirlash huquqi yo\'q.');
 
         $request->validate([
             'balance_action' => 'required|in:add,subtract,set',
@@ -279,7 +279,7 @@ class StaffController extends Controller
 
     public function destroy(User $user)
     {
-        if (auth()->user()->role !== 'admin') abort(403);
+        if (auth()->user()->role !== 'admin') abort(403, 'Xodimni o\'chirish huquqi faqat adminda mavjud.');
         
         if ($user->id === auth()->id()) {
             return redirect()->back()->withErrors(['error' => 'You cannot delete yourself or active core admin.']);

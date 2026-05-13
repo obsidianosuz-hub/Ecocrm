@@ -38,6 +38,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
     public function contracts()
     {
         return $this->hasMany(Contract::class);
@@ -51,5 +56,24 @@ class User extends Authenticatable
     public function shifts()
     {
         return $this->hasMany(Shift::class);
+    }
+
+    public function academyPayments()
+    {
+        return $this->hasMany(AcademyPayment::class, 'cashier_id');
+    }
+
+    public function groups()
+    {
+        return $this->hasMany(Group::class, 'teacher_id');
+    }
+
+    // Scope for multi-tenancy
+    public function scopeForCompany($query)
+    {
+        if (auth()->check() && !auth()->user()->is_master) {
+            return $query->where('company_id', auth()->user()->company_id);
+        }
+        return $query;
     }
 }

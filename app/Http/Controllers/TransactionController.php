@@ -13,6 +13,7 @@ class TransactionController extends Controller
     {
         $request->validate([
             'type' => 'required|in:income,expense,tech_expense,salary_payout,commission_payout,staff_loan',
+            'payment_method' => 'required|in:cash,card',
             'amount' => 'required|numeric|min:1',
             'description' => 'required|string|max:255',
             'staff_id' => 'nullable|exists:users,id'
@@ -43,6 +44,7 @@ class TransactionController extends Controller
             'user_id' => auth()->id(),
             'type' => $dbType,
             'amount' => $request->amount,
+            'payment_method' => $request->payment_method,
             'description' => $finalDescription,
         ]);
 

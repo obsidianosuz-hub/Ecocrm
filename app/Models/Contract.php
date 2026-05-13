@@ -7,9 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Contract extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\BelongsToCompany;
 
     protected $guarded = [];
+
+    protected $casts = [
+        'services_json' => 'array',
+    ];
 
     public function user()
     {

@@ -56,9 +56,15 @@
 }" class="flex flex-col h-full">
 
     <!-- Header Section -->
-    <div class="mb-4 md:mb-6 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[var(--active-color)] pb-4 gap-4">
+    <div class="mb-4 md:mb-6 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[var(--active-color)] pb-4 gap-4 relative">
         <div class="w-full">
-            <h1 class="text-xl md:text-3xl font-orbitron font-bold tracking-widest text-[var(--active-color)] uppercase">{{ __('messages.staff_registry_title') }}</h1>
+            <div class="flex items-center gap-4 mb-2">
+                <button onclick="window.history.back()" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-[var(--active-color)] hover:border-[var(--active-color)] transition-all shrink-0">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <h1 class="text-xl md:text-3xl font-orbitron font-bold tracking-widest text-[var(--active-color)] uppercase">{{ __('messages.staff_registry_title') }}</h1>
+            </div>
+            
             <div class="flex flex-wrap gap-2 md:gap-4 mt-2">
                 <button @click="activeTab = 'roster'" :class="activeTab === 'roster' ? 'text-[var(--active-color)] border-b-2 border-[var(--active-color)] shadow-[0_4px_10px_-5px_var(--active-color)]' : 'text-gray-500 hover:text-gray-300'" class="flex items-center gap-2 font-mono text-sm md:text-sm uppercase tracking-widest pb-1 transition-all group">
                     <svg class="w-4 h-4 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
@@ -78,7 +84,8 @@
                 </button>
             </div>
         </div>
-        <button @click="showAddModal = true" class="fixed bottom-6 right-6 md:static w-12 h-12 bg-[var(--active-color)] text-[var(--bg-color)] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-[0_0_15px_var(--active-color)] z-50">
+        
+        <button @click="showAddModal = true" class="fixed bottom-6 right-6 md:static w-12 h-12 bg-[var(--active-color)] text-[var(--bg-color)] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-[0_0_15px_var(--active-color)] z-50 shrink-0">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
         </button>
     </div>
@@ -128,6 +135,7 @@
                                         'admin' => 'bg-[var(--active-color)] text-black',
                                         'cashier' => 'bg-[var(--cyber-yellow)] text-black',
                                         'operator' => 'bg-purple-500 text-white',
+                                        'teacher' => 'bg-blue-500 text-white',
                                         'developer' => 'bg-green-500 text-black',
                                         default => 'bg-gray-700 text-white'
                                     };
@@ -379,6 +387,7 @@
                         <select name="role" required class="w-full bg-black border border-gray-700 p-2 text-white focus:border-[var(--active-color)] outline-none">
                             <option value="operator">Operator</option>
                             <option value="cashier">Kassir</option>
+                            <option value="teacher">O'qituvchi</option>
                             <option value="admin">Admin</option>
                         </select>
                     </div>
@@ -453,6 +462,7 @@
                         <select name="role" x-model="editUser.role" required class="w-full bg-black border border-gray-700 p-2 text-white focus:border-[var(--cyber-yellow)] outline-none">
                             <option value="operator">Operator</option>
                             <option value="cashier">Kassir</option>
+                            <option value="teacher">O'qituvchi</option>
                             <option value="admin">Admin</option>
                         </select>
                     </div>

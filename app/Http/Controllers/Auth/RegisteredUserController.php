@@ -30,21 +30,29 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
+            'company_name' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        $company = \App\Models\Company::create([
+            'name' => $request->company_name,
+            'slug' => \Illuminate\Support\Str::slug($request->company_name),
+            'status' => 'pending',
+        ]);
+
         $user = User::create([
+            'company_id' => $company->id,
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'admin',
+            'approval_status' => 'pending',
         ]);
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('login')->with('status', 'Arizongiz Master Admin tasdiqlashi uchun yuborildi. Iltimos kuting.');
     }
 }

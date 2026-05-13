@@ -12,7 +12,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Artisan::command('tasks:check-expired', function () {
-    $expiredTasks = Task::where('status', 'pending')->where('deadline', '<', now())->get();
+    $expiredTasks = Task::whereIn('status', ['pending', 'extension_pending'])->where('deadline', '<', now())->get();
     foreach ($expiredTasks as $task) {
         $task->update(['status' => 'failed']);
         if ($task->fine_amount > 0) {

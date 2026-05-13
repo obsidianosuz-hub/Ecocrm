@@ -1,140 +1,149 @@
 <x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <div x-data="neuralAuth()" class="glass-card max-w-md w-full p-10 sm:p-12 relative overflow-hidden">
+        <!-- Scanline Effect -->
+        <div x-show="scanning" class="scan-line"></div>
 
-    <div x-data="neuralAuth()">
-        <!-- Form UI -->
-        <form id="cyberLoginForm" method="POST" action="{{ route('login') }}" x-ref="loginForm" @submit.prevent="initiateLink">
+        <div class="mb-10 text-center">
+            <h1 class="text-4xl font-black text-white tracking-tighter mb-2">OBSIDIAN OS</h1>
+            <p class="text-[10px] font-black text-cyan-400 tracking-[0.5em] uppercase opacity-70">Neural Auth Protocol</p>
+        </div>
+
+        <x-auth-session-status class="mb-6" :status="session('status')" />
+
+        <div class="flex gap-6 mb-10 border-b border-white/5 pb-4">
+            <div class="flex-1 pb-2 text-[11px] font-black uppercase tracking-widest text-cyan-400 border-b-2 border-cyan-400 text-center">Credentials</div>
+            <a href="{{ route('register') }}" 
+                class="flex-1 pb-2 text-[11px] font-black uppercase tracking-widest transition-all text-white/30 hover:text-cyan-400 text-center">Join Mainframe</a>
+        </div>
+
+        <form id="cyberLoginForm" method="POST" action="{{ route('login') }}" @submit.prevent="initiateLink">
             @csrf
             
-            <div class="mb-4 text-center">
-                <span class="text-xs text-[var(--electric-blue)] font-mono tracking-widest break-all opacity-80">CONNECTING TO SECURE MAINFRAME...</span>
-            </div>
-            
-            <div class="mb-6 flex justify-center gap-6 text-sm font-mono tracking-widest uppercase">
-                <button type="button" @click="loginMode = 'standard'" :class="loginMode == 'standard' ? 'text-[var(--electric-blue)] border-b border-[var(--electric-blue)] font-bold shadow-[0_4px_10px_-2px_var(--electric-blue)]' : 'text-gray-500 hover:text-[var(--electric-blue)] transition-colors'" class="pb-1 transition-all">Neural ID</button>
-                <button type="button" @click="loginMode = 'faceid'" :class="loginMode == 'faceid' ? 'text-[var(--electric-blue)] border-b border-[var(--electric-blue)] font-bold shadow-[0_4px_10px_-2px_var(--electric-blue)]' : 'text-gray-500 hover:text-[var(--electric-blue)] transition-colors'" class="pb-1 transition-all">Biometric</button>
-            </div>
-
-            <div x-show="loginMode == 'standard'" x-transition>
-                <!-- Email Address -->
-                <div>
-                    <label for="email" class="block font-mono text-xs text-[var(--electric-blue)] uppercase tracking-widest opacity-80">Neural ID (Email)</label>
-                    <input id="email" class="block mt-1 w-full flex-1 bg-transparent border-b border-gray-700 outline-none pb-1 text-[var(--electric-blue)] focus:border-[var(--electric-blue)] transition-colors font-mono" type="email" name="email" value="{{ old('email') }}" autofocus autocomplete="username" :required="loginMode == 'standard'" />
-                    <x-input-error :messages="$errors->get('email')" class="mt-2 text-red-500 font-mono text-xs" />
+            <div class="space-y-6">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-white/40 uppercase tracking-widest ml-4">Neural Identity</label>
+                    <input type="email" name="email" value="{{ old('email') }}" required autofocus 
+                        class="w-full input-ios" placeholder="access@itcloud.uz">
+                    <x-input-error :messages="$errors->get('email')" class="mt-2 text-pink-500 text-[10px] font-bold px-4 uppercase" />
                 </div>
 
-                <!-- Password -->
-                <div class="mt-6">
-                    <label for="password" class="block font-mono text-xs text-[var(--electric-blue)] uppercase tracking-widest opacity-80">Access Code (Password)</label>
-                    <input id="password" class="block mt-1 w-full bg-transparent border-b border-gray-700 outline-none pb-1 text-[var(--electric-blue)] focus:border-[var(--electric-blue)] transition-colors font-mono" type="password" name="password" autocomplete="current-password" :required="loginMode == 'standard'" />
-                    <x-input-error :messages="$errors->get('password')" class="mt-2 text-red-500 font-mono text-xs" />
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-white/40 uppercase tracking-widest ml-4">Access Key</label>
+                    <input type="password" name="password" required 
+                        class="w-full input-ios" placeholder="••••••••">
+                    <x-input-error :messages="$errors->get('password')" class="mt-2 text-pink-500 text-[10px] font-bold px-4 uppercase" />
                 </div>
             </div>
-            
-            <div x-show="loginMode == 'faceid'" style="display: none;" x-transition>
-                 <div>
-                    <label for="face_id_token" class="block font-mono text-xs text-[var(--electric-blue)] uppercase tracking-widest opacity-80">Biometric Security Hash</label>
-                    <input id="face_id_token" class="block mt-1 w-full bg-transparent border-b border-gray-700 outline-none pb-1 text-[var(--electric-blue)] focus:border-[var(--electric-blue)] transition-colors font-mono" type="password" name="face_id_token" autocomplete="off" :required="loginMode == 'faceid'" />
-                    <p class="text-sm text-gray-500 mt-2 uppercase tracking-wide">Enter the Face ID Hash generated by admin. The system will mock facial resonance vector matching.</p>
-                    <x-input-error :messages="$errors->get('face_id_token')" class="mt-2 text-red-500 font-mono text-xs" />
-                 </div>
-            </div>
 
-            <div class="flex items-center justify-between mt-8">
-                <button type="submit" class="w-full bg-transparent border border-[var(--cyber-yellow)] text-[var(--cyber-yellow)] py-3 uppercase tracking-widest font-bold font-orbitron hover:bg-[var(--cyber-yellow)] hover:text-[var(--bg-color)] transition-all duration-300 relative group shadow-[0_0_15px_rgba(252,238,10,0.2)]">
-                    <span class="group-hover:cyber-glitch transition-all">INITIATE CONNECTION</span>
-                </button>
-            </div>
+            <button type="submit" class="w-full btn-neon py-5 mt-10 text-[12px] tracking-[0.3em] uppercase flex justify-center items-center gap-3" :disabled="scanning">
+                <i class="fa-solid fa-link text-sm"></i>
+                <span x-text="scanning ? 'CONNECTING...' : 'INITIATE LINK'"></span>
+            </button>
         </form>
 
-        <!-- Face ID Liveness Detection Overlay -->
-        <div x-show="scanning" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-95 backdrop-blur-md">
-            <div class="text-center relative cyber-panel p-8 shadow-[0_0_30px_rgba(0,240,255,0.2)]">
-                <div class="relative w-48 h-48 mx-auto mb-6 border border-gray-700 bg-black rounded-full flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(0,240,255,0.1)]">
-                    <!-- Camera Video -->
-                    <video id="faceIdVideo" autoplay muted playsinline class="absolute inset-0 object-cover w-full h-full opacity-70 transform scale-x-[-1]"></video>
-
-                    <!-- Scanner beam -->
-                    <div class="absolute inset-0 flex items-center justify-center mix-blend-screen text-[var(--electric-blue)] opacity-40">
-                        <svg class="w-full h-full p-4" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 30 V20 H30 M70 20 H80 V30 M80 70 V80 H70 M30 80 H20 V70" stroke-linecap="square"/></svg>
+        <!-- Scanning Overlay -->
+        <div x-show="scanning" style="display: none;" class="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-[#05050a]">
+            <div class="relative w-52 h-52 mb-8">
+                <!-- Ping effect -->
+                <div class="absolute inset-[-8px] border-4 border-cyan-400/20 rounded-full animate-ping"></div>
+                
+                <!-- Camera video feed (circular) -->
+                <div class="absolute inset-0 rounded-full overflow-hidden border-2 border-cyan-400/50 bg-black">
+                    <video x-ref="cameraFeed" autoplay playsinline muted class="w-full h-full object-cover scale-x-[-1]"></video>
+                    <!-- Fallback icon when camera not available -->
+                    <div x-show="!cameraActive" class="absolute inset-0 flex items-center justify-center bg-cyan-400/5">
+                        <i class="fa-solid fa-fingerprint text-5xl text-cyan-400 animate-pulse"></i>
                     </div>
-                    <div class="absolute inset-x-0 h-1 bg-[var(--electric-blue)] shadow-[0_0_10px_var(--electric-blue)] z-20 pointer-events-none" style="top: 0; animation: scan 2s linear infinite"></div>
-                    
-                    <style>
-                        @keyframes scan { 100% { top: 100%; } }
-                    </style>
+                    <!-- Scan line over video -->
+                    <div class="absolute left-0 right-0 h-[2px] bg-cyan-400 shadow-[0_0_12px_rgba(0,255,204,0.8)] animate-[faceScan_2s_linear_infinite]"></div>
                 </div>
-                <h2 class="text-lg font-orbitron font-bold text-[var(--electric-blue)] mb-2 uppercase tracking-widest">Biometric Validation</h2>
-                <p class="text-[var(--electric-blue)] font-mono text-xs uppercase tracking-widest glitch-anim" x-text="scanMessage"></p>
-                <div class="w-full h-1 bg-gray-900 mx-auto mt-4">
-                    <div class="h-full bg-[var(--electric-blue)] transition-all duration-500" :style="'width: ' + progress + '%'"></div>
-                </div>
+
+                <!-- Progress ring -->
+                <svg class="absolute inset-[-4px] w-[calc(100%+8px)] h-[calc(100%+8px)] transform -rotate-90">
+                    <circle cx="50%" cy="50%" r="106" stroke="currentColor" stroke-width="3" fill="transparent" class="text-white/5" />
+                    <circle cx="50%" cy="50%" r="106" stroke="currentColor" stroke-width="3" fill="transparent" 
+                        :stroke-dasharray="2 * Math.PI * 106" 
+                        :stroke-dashoffset="2 * Math.PI * 106 * (1 - progress / 100)" 
+                        class="text-cyan-400 transition-all duration-300" />
+                </svg>
+            </div>
+
+            <h2 class="text-xs font-black text-cyan-400 uppercase tracking-[0.3em] mb-4" x-text="scanMessage"></h2>
+            <div class="w-52 h-0.5 bg-white/5 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-cyan-400 to-purple-500 transition-all duration-300 shadow-[0_0_15px_rgba(0,255,204,0.6)]" :style="'width: ' + progress + '%'"></div>
             </div>
         </div>
     </div>
 
+    <style>
+        @keyframes faceScan {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+    </style>
+
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('neuralAuth', () => ({
-                loginMode: '{{ (old('face_id_token') || $errors->has('face_id_token')) ? 'faceid' : 'standard' }}',
                 scanning: false,
                 progress: 0,
+                cameraActive: false,
                 scanMessage: 'INITIALIZING CAMERA...',
-                initiateLink() {
+
+                async initiateLink() {
                     this.scanning = true;
-                    this.progress = 10;
-                    this.scanMessage = 'ACCESSING BIOMETRICS...';
-                    
-                    // Access Web Camera
-                    const video = document.getElementById('faceIdVideo');
-                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-                            .then(function(stream) {
-                                video.srcObject = stream;
-                            })
-                            .catch(function(error) {
-                                console.log("Camera access denied", error);
-                            });
+                    this.progress = 5;
+                    this.scanMessage = 'INITIALIZING CAMERA...';
+
+                    // Try to open the camera
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ 
+                            video: { facingMode: 'user', width: 320, height: 320 } 
+                        });
+                        this.$refs.cameraFeed.srcObject = stream;
+                        this.cameraActive = true;
+                        this.scanMessage = 'SCANNING FACE...';
+                    } catch (err) {
+                        console.warn('Camera not available:', err);
+                        this.cameraActive = false;
+                        this.scanMessage = 'ENCRYPTING DATA...';
                     }
-                    
-                    setTimeout(() => {
-                        this.progress = 50;
-                        this.scanMessage = 'ANALYZING NEURAL PATTERNS...';
-                    }, 1500);
 
-                    setTimeout(() => {
-                        this.progress = 90;
-                        this.scanMessage = 'VERIFYING IDENTITY...';
-                    }, 3000);
+                    this.progress = 15;
 
-                    setTimeout(() => {
-                        this.progress = 100;
-                        this.scanMessage = 'ACCESS GRANTED.';
-                        
-                        // Stop camera stream
-                        if (video.srcObject) {
-                            video.srcObject.getTracks().forEach(track => track.stop());
+                    // Run progress animation
+                    let interval = setInterval(() => {
+                        this.progress += Math.floor(Math.random() * 8) + 3;
+
+                        if (this.progress >= 25 && this.progress < 50) {
+                            this.scanMessage = this.cameraActive ? 'ANALYZING BIOMETRICS...' : 'ESTABLISHING HANDSHAKE...';
+                        }
+                        if (this.progress >= 50 && this.progress < 75) {
+                            this.scanMessage = this.cameraActive ? 'FACE RECOGNIZED' : 'VERIFYING CREDENTIALS...';
+                        }
+                        if (this.progress >= 75 && this.progress < 95) {
+                            this.scanMessage = 'VERIFYING CREDENTIALS...';
+                        }
+                        if (this.progress >= 95) {
+                            this.scanMessage = 'ACCESS AUTHORIZED';
                         }
 
-                        // Play AI Voice
-                        if ('speechSynthesis' in window) {
-                            const msg = new SpeechSynthesisUtterance();
-                            msg.text = "Identity verified. System operational.";
-                            msg.volume = 1;
-                            msg.rate = 1.2;
-                            msg.pitch = 0.8;
-                            window.speechSynthesis.speak(msg);
-                        }
+                        if (this.progress >= 100) {
+                            this.progress = 100;
+                            clearInterval(interval);
 
-                        // Actually submit the form
-                        setTimeout(() => {
-                            document.getElementById('cyberLoginForm').submit();
-                        }, 1000);
-                        
-                    }, 4000);
+                            // Stop camera
+                            if (this.cameraActive && this.$refs.cameraFeed.srcObject) {
+                                this.$refs.cameraFeed.srcObject.getTracks().forEach(t => t.stop());
+                            }
+
+                            setTimeout(() => document.getElementById('cyberLoginForm').submit(), 600);
+                        }
+                    }, 200);
                 }
             }));
         });
     </script>
 </x-guest-layout>
+

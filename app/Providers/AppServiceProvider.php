@@ -23,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Gate::define('master-access', function (\App\Models\User $user) {
+            return $user->is_master === true;
+        });
+
         Event::listen(Logout::class, function (Logout $event) {
             if ($event->user) {
                 $activeShift = Shift::where('user_id', $event->user->id)->whereNull('ended_at')->first();

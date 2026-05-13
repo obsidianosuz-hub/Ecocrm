@@ -5,10 +5,15 @@ use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    return view('welcome');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Master Admin Routes
+    Route::group(['prefix' => 'master', 'middleware' => 'can:master-access'], function() {
+        Route::get('/dashboard', [App\Http\Controllers\Master\AdminController::class, 'index'])->name('master.dashboard');
+        Route::post('/companies/{company}/approve', [App\Http\Controllers\Master\AdminController::class, 'approveCompany'])->name('master.companies.approve');
+    });
     Route::get('/dashboard', function () {
         return redirect()->route(auth()->user()->role . '.dashboard');
     })->name('dashboard');
@@ -18,7 +23,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
     Route::get('/operator/dashboard', [DashboardController::class, 'operator'])->name('operator.dashboard');
     Route::get('/cashier/dashboard', [DashboardController::class, 'cashier'])->name('cashier.dashboard');
-
+    Route::get('/teacher/dashboard', [DashboardController::class, 'teacher'])->name('teacher.dashboard');
+    Route::get('/teacher/students', [\App\Http\Controllers\Academy\TeacherController::class, 'myStudents'])->name('teacher.students');
+    Route::post('/teacher/grade', [\App\Http\Controllers\Academy\TeacherController::class, 'storeGrade'])->name('teacher.grade.store');
+    Route::post('/teacher/topic', [\App\Http\Controllers\Academy\TeacherController::class, 'storeTopic'])->name('teacher.topic.store');
     // Operator specific
     Route::post('/contracts', [\App\Http\Controllers\ContractController::class, 'store'])->name('contracts.store');
 
@@ -83,17 +91,44 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/debts/{debt}/pay', [\App\Http\Controllers\DebtController::class, 'payOneTime'])->name('admin.debts.payOneTime');
         Route::get('/debts/{debt}/schedule', [\App\Http\Controllers\DebtController::class, 'showSchedule'])->name('admin.debts.showSchedule');
         Route::get('/debts/{debt}/print-schedule', [\App\Http\Controllers\DebtController::class, 'printSchedule'])->name('admin.debts.printSchedule');
+        
+        // Academy Management
+        Route::get('/academy', [\App\Http\Controllers\Academy\AcademyController::class, 'index'])->name('admin.academy.index');
+        Route::resource('academy/courses', \App\Http\Controllers\Academy\CourseController::class)->names('admin.academy.courses');
+        Route::resource('academy/students', \App\Http\Controllers\Academy\StudentController::class)->names('admin.academy.students');
+        Route::resource('academy/groups', \App\Http\Controllers\Academy\GroupController::class)->names('admin.academy.groups');
+        Route::resource('academy/rooms', \App\Http\Controllers\Academy\RoomController::class)->names('admin.academy.rooms');
+        Route::resource('academy/teachers', \App\Http\Controllers\Academy\AdminTeacherController::class)->names('admin.academy.teachers');
+        Route::resource('academy/schedules', \App\Http\Controllers\Academy\ScheduleController::class)->names('admin.academy.schedules');
+        Route::resource('academy/telegram-bots', \App\Http\Controllers\Academy\TelegramBotController::class)->names('admin.academy.telegram_bots');
+        
+        Route::get('academy/attendance/{group}', [\App\Http\Controllers\Academy\AttendanceController::class, 'getStudents'])->name('admin.academy.attendance.students');
+        Route::post('academy/attendance', [\App\Http\Controllers\Academy\AttendanceController::class, 'store'])->name('admin.academy.attendance.store');
+
+        Route::get('academy/students/search', [\App\Http\Controllers\Academy\StudentController::class, 'search'])->name('admin.academy.students.search');
+        Route::post('academy/students/add-to-group', [\App\Http\Controllers\Academy\StudentController::class, 'addToGroup'])->name('admin.academy.students.add_to_group');
+        
+        Route::post('academy/payments', [\App\Http\Controllers\Academy\AcademyPaymentController::class, 'store'])->name('admin.academy.payments.store');
+        Route::get('academy/payments/history/{student}', [\App\Http\Controllers\Academy\AcademyPaymentController::class, 'history'])->name('admin.academy.payments.history');
+        
+        // Audit Logs (Ghost Log)
+        Route::get('/audit-logs', [App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('admin.audit_logs.index');
+        Route::get('/audit-logs/pdf', [App\Http\Controllers\Admin\AuditLogController::class, 'downloadPdf'])->name('admin.audit_logs.pdf');
     });
 
     Route::get('/clients/search', [\App\Http\Controllers\ClientController::class, 'search'])->name('clients.search');
+    
+    // Exports
+    Route::get('/reports/daily', [\App\Http\Controllers\ExportController::class, 'dailyReport'])->name('reports.daily');
+    Route::get('/reports/clients', [\App\Http\Controllers\ExportController::class, 'exportClients'])->name('reports.clients');
+    Route::get('/reports/transactions', [\App\Http\Controllers\ExportController::class, 'exportTransactions'])->name('reports.transactions');
 
     // Chat & Tasks
     Route::get('/chat', [\App\Http\Controllers\ChatController::class, 'index'])->name('chat.index');
     Route::post('/chat', [\App\Http\Controllers\ChatController::class, 'send'])->name('chat.send');
     Route::post('/chat/task', [\App\Http\Controllers\ChatController::class, 'assignTask'])->name('chat.task.assign');
-    Route::post('/chat/task/{task}/complete', [\App\Http\Controllers\ChatController::class, 'completeTask'])->name('chat.task.complete');
-    
-    Route::post('/chat/task/{task}', [\App\Http\Controllers\ChatController::class, 'editTask'])->name('chat.task.edit');
+    Route::post('/chat/task/{task}/submit', [\App\Http\Controllers\ChatController::class, 'submitTask'])->name('chat.task.submit');
+    Route::post('/chat/task/{task}/verify', [\App\Http\Controllers\ChatController::class, 'verifyTask'])->name('chat.task.verify');
     Route::delete('/chat/task/{task}', [\App\Http\Controllers\ChatController::class, 'deleteTask'])->name('chat.task.delete');
     
     Route::post('/chat/clear', [\App\Http\Controllers\ChatController::class, 'clear'])->name('chat.clear');

@@ -27,9 +27,8 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required_without:face_id_token', 'string', 'email', 'nullable'],
-            'password' => ['required_without:face_id_token', 'string', 'nullable'],
-            'face_id_token' => ['nullable', 'string']
+            'email' => ['required', 'string', 'email'],
+            'password' => ['required', 'string'],
         ];
     }
 
@@ -41,20 +40,6 @@ class LoginRequest extends FormRequest
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
-
-        if ($this->filled('face_id_token')) {
-            $user = \App\Models\User::where('face_id_token', $this->input('face_id_token'))->first();
-            if ($user) {
-                Auth::login($user, $this->boolean('remember'));
-                RateLimiter::clear($this->throttleKey());
-                return;
-            } else {
-                RateLimiter::hit($this->throttleKey());
-                throw ValidationException::withMessages([
-                    'face_id_token' => 'Biometric signature rejected.',
-                ]);
-            }
-        }
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
@@ -95,10 +80,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        $identifier = $this->filled('face_id_token') 
-            ? Str::transliterate(Str::lower($this->input('face_id_token'))) 
-            : Str::transliterate(Str::lower($this->string('email')));
-            
-        return $identifier.'|'.$this->ip();
+        return Str::transliterate(Str::lower($this->string('email'))).'|'.$this->ip();
     }
 }

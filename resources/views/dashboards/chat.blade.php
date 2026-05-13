@@ -12,9 +12,14 @@
 
 @section('content')
 <div class="mb-4 flex flex-col md:flex-row justify-between md:items-end border-b border-[var(--border-color)] border-opacity-30 pb-4 shrink-0">
-    <div>
-        <h1 class="text-2xl md:text-3xl font-orbitron font-bold tracking-widest text-[var(--electric-blue)] drop-shadow-[0_0_10px_var(--electric-blue)] uppercase">The Syndicate Chat</h1>
-        <p class="text-sm opacity-70 mt-1 font-mono tracking-widest uppercase text-[var(--text-color)]">Xodimlar o'rtasida xavfsiz va tezkor yozishmalar</p>
+    <div class="flex items-center gap-4">
+        <button onclick="window.history.back()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-[var(--electric-blue)] hover:border-[var(--electric-blue)] transition-all shrink-0">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div>
+            <h1 class="text-2xl md:text-3xl font-orbitron font-bold tracking-widest text-[var(--electric-blue)] drop-shadow-[0_0_10px_var(--electric-blue)] uppercase">The Syndicate Chat</h1>
+            <p class="text-sm opacity-70 mt-1 font-mono tracking-widest uppercase text-[var(--text-color)]">Xodimlar o'rtasida xavfsiz va tezkor yozishmalar</p>
+        </div>
     </div>
 </div>
 
@@ -167,174 +172,246 @@
     <!-- Tasks Section -->
     <div x-show="activeTab === 'tasks'" style="display: none;" class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1 min-h-0">
 
-        <!-- Assign Task Form (All Users) -->
-        <div class="cyber-panel p-4 flex flex-col md:col-span-1 shrink-0 bg-opacity-20">
+        <!-- Assign Task Form (Admin & Cashier) -->
+        @if(auth()->user()->role === 'admin' || auth()->user()->role === 'cashier')
+        <div class="cyber-panel p-4 flex flex-col md:col-span-1 shrink-0 bg-opacity-20 border-[var(--cyber-yellow)]">
             <h3 class="font-orbitron font-bold text-[var(--cyber-yellow)] mb-3 border-b border-[var(--cyber-yellow)] border-opacity-30 pb-2 flex justify-between items-center text-xs uppercase tracking-widest">
-                Vazifa Berish
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                Topshiriq Berish Center
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </h3>
             <form method="POST" action="{{ route('chat.task.assign') }}" class="space-y-3 font-mono">
                 @csrf
                 <div>
-                    <label class="block text-[var(--text-color)] opacity-70 mb-1 text-xs uppercase tracking-widest">Xodimni tanlang</label>
-                    <select name="assigned_to" required class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] p-2 text-[var(--active-color)] focus:outline-none focus:border-[var(--cyber-yellow)] text-xs appearance-none">
+                    <label class="block text-[var(--text-color)] opacity-70 mb-1 text-[10px] uppercase tracking-widest font-black">Agent (Mijrochi)</label>
+                    <select name="assigned_to" required class="w-full bg-black/40 border border-white/10 p-2 text-[var(--electric-blue)] focus:outline-none focus:border-[var(--cyber-yellow)] text-xs appearance-none font-bold">
                         @foreach($users as $u)
-                            <option value="{{ $u->id }}">{{ $u->name }} ({{ ucfirst($u->role) }})</option>
+                            <option value="{{ $u->id }}">{{ $u->name }} [{{ strtoupper($u->role) }}]</option>
                         @endforeach
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[var(--text-color)] opacity-70 mb-1 text-xs uppercase tracking-widest">Vazifa Nomi</label>
-                    <input type="text" name="title" required placeholder="Masalan: Kunlik hisobotni topshirish" class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] p-2 text-[var(--text-color)] focus:outline-none focus:border-[var(--cyber-yellow)] text-xs uppercase placeholder-opacity-50">
+                    <label class="block text-[var(--text-color)] opacity-70 mb-1 text-[10px] uppercase tracking-widest font-black">Mission Objective</label>
+                    <input type="text" name="title" required placeholder="DIRETIVE_TITLE_01" class="w-full bg-black/40 border border-white/10 p-2 text-white focus:outline-none focus:border-[var(--cyber-yellow)] text-xs uppercase placeholder-opacity-20 font-bold">
                 </div>
                 <div>
-                    <label class="block text-[var(--text-color)] opacity-70 mb-1 text-xs uppercase tracking-widest">Qo'shimcha Ma'lumot</label>
-                    <textarea name="description" required rows="2" class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] p-2 text-[var(--text-color)] focus:outline-none focus:border-[var(--cyber-yellow)] text-xs resize-none placeholder-opacity-50 uppercase" placeholder="Vazifani tushuntiring..."></textarea>
+                    <label class="block text-[var(--text-color)] opacity-70 mb-1 text-[10px] uppercase tracking-widest font-black">Operational Intel (Tavsif)</label>
+                    <textarea name="description" required rows="2" class="w-full bg-black/40 border border-white/10 p-2 text-white focus:outline-none focus:border-[var(--cyber-yellow)] text-[11px] resize-none placeholder-opacity-20 uppercase" placeholder="DECRYPTED_DETAILS..."></textarea>
                 </div>
-                <div class="grid grid-cols-3 gap-2">
+                <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-red-500 mb-1 text-xs uppercase tracking-widest">Jarima (UZS)</label>
-                        <input type="number" name="fine_amount" value="50000" required class="w-full bg-[var(--bg-color)] border border-red-500 border-opacity-50 p-2 text-red-500 focus:outline-none focus:border-red-500 shadow-[inset_0_0_5px_rgba(255,0,0,0.1)] text-xs font-bold">
+                        <label class="block text-red-500 mb-1 text-[10px] uppercase tracking-widest font-black">Penalty (Fine)</label>
+                        <input type="number" name="fine_amount" value="50000" required class="w-full bg-red-500/10 border border-red-500/30 p-2 text-red-500 focus:outline-none focus:border-red-500 text-xs font-black">
                     </div>
                     <div>
-                        <label class="block text-[var(--cyber-yellow)] mb-1 text-xs uppercase tracking-widest">XP Reward</label>
-                        <input type="number" name="xp_reward" value="100" required class="w-full bg-[var(--bg-color)] border border-[var(--cyber-yellow)] border-opacity-50 p-2 text-[var(--cyber-yellow)] focus:outline-none focus:border-[var(--cyber-yellow)] shadow-[inset_0_0_5px_rgba(252,238,10,0.1)] text-xs font-bold">
-                    </div>
-                    <div>
-                        <label class="block text-[var(--text-color)] opacity-70 mb-1 text-xs uppercase tracking-widest">Oxirgi muddat</label>
-                        <input type="datetime-local" name="deadline" required class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] p-2 text-[var(--text-color)] focus:outline-none focus:border-[var(--cyber-yellow)] text-xs">
+                        <label class="block text-green-400 mb-1 text-[10px] uppercase tracking-widest font-black">Reward (Bonus)</label>
+                        <input type="number" name="reward_amount" value="0" required class="w-full bg-green-500/10 border border-green-500/30 p-2 text-green-400 focus:outline-none focus:border-green-500 text-xs font-black">
                     </div>
                 </div>
-                <button type="submit" class="w-full py-2 bg-[var(--cyber-yellow)] text-[var(--bg-color)] font-bold text-sm uppercase tracking-widest mt-2 hover:bg-transparent hover:text-[var(--cyber-yellow)] border border-transparent hover:border-[var(--cyber-yellow)] transition-all shadow-[0_0_10px_rgba(252,238,10,0.2)] hover:shadow-none">
-                    Topshiriqni Yuborish
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[var(--cyber-yellow)] mb-1 text-[10px] uppercase tracking-widest font-black">XP Yield</label>
+                        <input type="number" name="xp_reward" value="100" required class="w-full bg-[var(--cyber-yellow)]/10 border border-[var(--cyber-yellow)]/30 p-2 text-[var(--cyber-yellow)] focus:outline-none focus:border-[var(--cyber-yellow)] text-xs font-black">
+                    </div>
+                    <div>
+                        <label class="block text-[var(--electric-blue)] mb-1 text-[10px] uppercase tracking-widest font-black">Sync Deadline</label>
+                        <input type="datetime-local" name="deadline" required class="w-full bg-[var(--electric-blue)]/10 border border-[var(--electric-blue)]/30 p-2 text-[var(--electric-blue)] focus:outline-none focus:border-[var(--electric-blue)] text-xs font-bold">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3 bg-[var(--cyber-yellow)] text-[var(--bg-color)] font-black text-xs uppercase tracking-[0.2em] mt-2 hover:bg-white transition-all shadow-[0_0_20px_rgba(252,238,10,0.3)] group">
+                    <span class="group-hover:scale-110 inline-block transition-transform">Initiate Directive</span>
                 </button>
             </form>
         </div>
+        @else
+        <!-- Staff View Placeholder if needed -->
+        <div class="cyber-panel p-6 flex flex-col md:col-span-1 shrink-0 bg-opacity-20 border-[var(--electric-blue)] justify-center items-center text-center">
+            <i class="fa-solid fa-user-secret text-4xl text-[var(--electric-blue)] opacity-30 mb-4 animate-pulse"></i>
+            <h3 class="text-xs font-black uppercase tracking-widest opacity-50">Operational Agent Hub</h3>
+            <p class="text-[10px] opacity-30 mt-2">Siz faqat berilgan vazifalarni bajarish va hisobot berish huquqiga egasiz.</p>
+        </div>
+        @endif
 
         <!-- Active Tasks List -->
-        <div class="cyber-panel p-4 flex flex-col md:col-span-2 overflow-y-auto slim-scroll relative border border-[var(--cyber-yellow)] border-opacity-30 shadow-[inset_0_0_20px_rgba(252,238,10,0.05)]">
-            <h3 class="font-orbitron font-bold text-[var(--cyber-yellow)] mb-4 border-b border-[var(--border-color)] border-opacity-30 pb-2 flex justify-between items-center sticky top-0 bg-[var(--panel-bg)] backdrop-blur-md pt-2 z-10 uppercase tracking-widest text-sm drop-shadow-[0_0_5px_var(--cyber-yellow)]">
-                Barcha Vazifalar (Nazorat)
-                <span class="bg-[var(--cyber-yellow)] text-[var(--bg-color)] text-sm px-2 py-0.5 font-bold shadow-[0_0_5px_var(--cyber-yellow)]">{{ count($tasks) }}</span>
+        <div class="cyber-panel p-4 flex flex-col md:col-span-2 overflow-y-auto slim-scroll relative border border-white/5 shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]">
+            <h3 class="font-orbitron font-bold text-white mb-4 border-b border-white/5 pb-2 flex justify-between items-center sticky top-0 bg-black/60 backdrop-blur-lg pt-2 z-10 uppercase tracking-[0.2em] text-xs">
+                Active Directives Node
+                <span class="bg-white text-black text-[10px] px-2 py-0.5 font-black shadow-[0_0_10px_rgba(255,255,255,0.3)]">{{ count($tasks) }} UNITS</span>
             </h3>
             
-            <div class="space-y-3 font-mono w-full">
+            <div class="space-y-4 font-mono w-full">
                 @forelse($tasks as $task)
-                    <div x-data="{ editingTask: false }" class="p-4 border {{ $task->status == 'pending' ? 'border-[var(--cyber-yellow)] hover:bg-gray-500 hover:bg-opacity-10' : ($task->status == 'done' ? 'border-[var(--active-color)] opacity-70' : 'border-red-500 opacity-80 shadow-[inset_0_0_10px_rgba(255,0,0,0.2)]') }} transition-all relative">
+                    <div x-data="taskComponent('{{ $task->deadline }}', '{{ $task->status }}')" class="p-5 border transition-all relative overflow-hidden group" :class="status === 'completed' ? 'border-green-500/20 bg-green-500/5 opacity-60' : (status != 'completed' && timeLeft <= 0 ? 'border-red-500 shadow-[inset_0_0_20px_rgba(255,0,0,0.1)]' : 'border-white/5 bg-white/[0.02] hover:bg-white/[0.05]')">
                         
-                        <div x-show="!editingTask" class="flex flex-col h-full justify-between">
-                            <div>
-                                <!-- Status Badge & Admin Tools -->
-                                <div class="flex justify-between items-start mb-2 gap-2">
-                                    <div class="flex-1">
-                                        <div class="text-xs uppercase font-bold tracking-widest {{ $task->status == 'pending' ? 'text-[var(--cyber-yellow)]' : '' }} {{ $task->status == 'done' ? 'text-[var(--active-color)]' : '' }} {{ $task->status == 'failed' ? 'text-red-500' : '' }} mb-1">
-                                            > STATUS: {{ $task->status == 'pending' ? 'KUTILMOQDA' : ($task->status == 'done' ? 'BAJARILDI' : 'MUDDAT O\'TDI') }}
-                                        </div>
-                                        <h4 class="font-bold text-sm text-[var(--text-color)] leading-tight uppercase tracking-wider mb-2">{{ $task->title }}</h4>
-                                    </div>
-                                    @if(auth()->user()->role === 'admin')
-                                    <div class="flex gap-1 shrink-0">
-                                        <button @click="editingTask = true" class="text-xs border border-[var(--electric-blue)] text-[var(--electric-blue)] px-2 py-0.5 hover:bg-[var(--electric-blue)] hover:text-[var(--bg-color)] transition-colors uppercase font-bold tracking-widest">EDT</button>
-                                        <form method="POST" action="{{ route('chat.task.delete', $task->id) }}" onsubmit="return confirm('Vazifani o\'chirib tashlaysizmi?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-xs border border-red-500 text-red-500 px-2 py-0.5 hover:bg-red-500 hover:text-white transition-colors uppercase font-bold tracking-widest">DEL</button>
-                                        </form>
-                                    </div>
-                                    @endif
+                        <!-- Header: Title & Identity -->
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <template x-if="status === 'pending'">
+                                        <span class="text-[9px] font-black bg-cyan-500 text-black px-2 py-0.5 uppercase tracking-widest animate-pulse">Live</span>
+                                    </template>
+                                    <template x-if="status === 'awaiting_verification'">
+                                        <span class="text-[9px] font-black bg-purple-500 text-white px-2 py-0.5 uppercase tracking-widest">Awaiting Verification</span>
+                                    </template>
+                                    <template x-if="status === 'extension_pending'">
+                                        <span class="text-[9px] font-black bg-yellow-500 text-black px-2 py-0.5 uppercase tracking-widest">Extension Requested</span>
+                                    </template>
+                                    <template x-if="status === 'completed'">
+                                        <span class="text-[9px] font-black bg-green-500 text-black px-2 py-0.5 uppercase tracking-widest">Archive Fixed</span>
+                                    </template>
+                                    <template x-if="status === 'failed'">
+                                        <span class="text-[9px] font-black bg-red-500 text-white px-2 py-0.5 uppercase tracking-widest">Failed Directive</span>
+                                    </template>
+                                    <span class="text-[9px] text-white/30 uppercase tracking-widest">REF_ID: #{{ str_pad($task->id, 4, '0', STR_PAD_LEFT) }}</span>
                                 </div>
-                                
-                                <div class="text-sm text-[var(--text-color)] opacity-70 mb-2 flex justify-between items-center bg-black bg-opacity-50 p-1 border border-[var(--border-color)] border-opacity-30">
-                                    @if(auth()->user()->role === 'admin')
-                                        <span class="uppercase tracking-widest">Mijrochi: <b class="text-[var(--active-color)]">{{ $task->assignee->name ?? 'Noma\'lum' }}</b></span>
-                                    @else
-                                        <span class="uppercase tracking-widest">Buyruq: <b class="text-[var(--electric-blue)]">{{ $task->assigner->name ?? 'Admin' }}</b></span>
-                                    @endif
-                                </div>
-                                
-                                <p class="text-sm text-[var(--text-color)] opacity-80 mb-3 bg-black bg-opacity-30 p-2 border border-transparent border-l-[var(--border-color)]">{{ $task->description }}</p>
+                                <h4 class="font-black text-sm text-white uppercase tracking-wider leading-tight">{{ $task->title }}</h4>
                             </div>
-
-                            <div class="flex flex-col sm:flex-row justify-between sm:items-end border-t border-[var(--border-color)] border-opacity-30 pt-2 gap-3 mt-auto">
-                                <div>
-                                    <div class="text-sm {{ \Carbon\Carbon::parse($task->deadline)->isPast() && $task->status == 'pending' ? 'text-red-500 font-bold animate-pulse' : 'text-[var(--text-color)] opacity-70' }} uppercase tracking-widest">
-                                        DL: {{ \Carbon\Carbon::parse($task->deadline)->format('d.m.Y H:i') }}
-                                    </div>
-                                    @if($task->fine_amount > 0)
-                                        <div class="text-sm text-red-500 mt-1 font-bold bg-red-500 bg-opacity-10 px-1 py-0.5 inline-block border border-red-500 border-opacity-30 uppercase tracking-widest">
-                                            ! PENALTY: {{ number_format($task->fine_amount, 0) }} UZS
-                                        </div>
-                                    @endif
-                                    @if($task->xp_reward > 0)
-                                        <div class="text-sm text-[var(--cyber-yellow)] mt-1 ml-1 font-bold bg-gray-500 bg-opacity-10 px-1 py-0.5 inline-block border border-[var(--cyber-yellow)] border-opacity-30 uppercase tracking-widest">
-                                            + {{ $task->xp_reward }} XP
-                                        </div>
-                                    @endif
-                                </div>
-
-                                @if($task->status == 'pending' && (auth()->user()->role === 'admin' || auth()->id() == $task->assigned_to))
-                                    <form method="POST" action="{{ route('chat.task.complete', $task->id) }}">
-                                        @csrf
-                                        <button type="submit" class="text-sm px-3 py-1 bg-[var(--active-color)] text-[var(--bg-color)] uppercase tracking-widest font-bold border border-transparent hover:bg-transparent hover:text-[var(--active-color)] hover:border-[var(--active-color)] transition-colors shadow-[0_0_10px_rgba(0,255,0,0.2)] hover:shadow-none w-full sm:w-auto">
-                                            > COMPLETE
-                                        </button>
-                                    </form>
-                                @endif
-                                @if($task->status == 'done')
-                                    <div class="text-sm text-[var(--active-color)] font-bold uppercase tracking-widest">> TASK VERIFIED</div>
-                                @endif
+                            
+                            <!-- Countdown Display -->
+                            <div x-show="status === 'pending' || status === 'extension_pending' || status === 'awaiting_verification'" class="text-right">
+                                <div class="text-[18px] font-black leading-none" :class="timeLeft < 3600 ? 'text-red-500 animate-pulse' : 'text-cyan-400'" x-text="countdownText"></div>
+                                <div class="text-[8px] text-white/30 uppercase tracking-[0.3em] mt-1">Remaining Time</div>
                             </div>
                         </div>
 
-                        <!-- Inline Edit Form (Admin Only) -->
-                        @if(auth()->user()->role === 'admin')
-                        <div x-show="editingTask" style="display: none;" class="mt-2 text-sm border-t border-[var(--cyber-yellow)] border-opacity-50 pt-3">
-                            <h4 class="font-bold text-[var(--cyber-yellow)] mb-3 text-sm uppercase tracking-widest">EDIT_TASK_MODULE</h4>
-                            <form method="POST" action="{{ route('chat.task.edit', $task->id) }}" class="space-y-2">
+                        <!-- Intel Details -->
+                        <div class="mb-4">
+                            <p class="text-[11px] text-white/60 leading-relaxed mb-4 p-3 bg-black/40 border-l border-white/10 italic">"{{ $task->description }}"</p>
+                            
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                                <div class="bg-black/20 p-2 border border-white/5">
+                                    <div class="text-[8px] text-white/30 uppercase tracking-widest mb-1">Assigned To</div>
+                                    <div class="text-[10px] font-bold text-cyan-400">{{ $task->assignee->name ?? 'UNKNOWN' }}</div>
+                                </div>
+                                <div class="bg-black/20 p-2 border border-white/5">
+                                    <div class="text-[8px] text-white/30 uppercase tracking-widest mb-1">Penalty</div>
+                                    <div class="text-[10px] font-bold text-red-500">{{ number_format($task->fine_amount) }} UZS</div>
+                                </div>
+                                <div class="bg-black/20 p-2 border border-white/5">
+                                    <div class="text-[8px] text-white/30 uppercase tracking-widest mb-1">Bonus Yield</div>
+                                    <div class="text-[10px] font-bold text-green-400">{{ number_format($task->reward_amount) }} UZS / {{ $task->xp_reward }} XP</div>
+                                </div>
+                                <div class="bg-black/20 p-2 border border-white/5">
+                                    <div class="text-[8px] text-white/30 uppercase tracking-widest mb-1">Sync Deadline</div>
+                                    <div class="text-[10px] font-bold text-white/60">{{ \Carbon\Carbon::parse($task->deadline)->format('H:i d.m.Y') }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                         <!-- Proof View -->
+                         @if($task->proof_file)
+                            <div class="mb-4 p-3 bg-cyan-400/5 border border-cyan-400/20 rounded-lg flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <i class="fa-solid fa-file-shield text-cyan-400 text-xl"></i>
+                                    <div>
+                                        <div class="text-[10px] font-black text-cyan-400 uppercase tracking-widest">Evidence Node Connected</div>
+                                        <div class="text-[10px] text-white/40 font-mono">{{ basename($task->proof_file) }}</div>
+                                    </div>
+                                </div>
+                                <a href="/storage/{{ $task->proof_file }}" target="_blank" class="text-[10px] font-black bg-cyan-400 text-black px-4 py-1.5 uppercase hover:bg-white transition-all">Download Proof</a>
+                            </div>
+                        @endif
+
+                        @if($task->extension_requested)
+                            <div class="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 rounded-lg text-xs italic">
+                                <strong class="uppercase not-italic text-[9px] block mb-1">Extension Justification:</strong>
+                                "{{ $task->extension_reason }}"
+                            </div>
+                        @endif
+
+                        <!-- Action Controls (Agent) -->
+                        @if($task->assigned_to == auth()->id() && $task->status != 'completed' && $task->status != 'failed')
+                        <div x-data="{ showSubmit: false, showExtend: false, showFail: false }" class="mt-4 pt-4 border-t border-white/5">
+                            <div x-show="!showSubmit && !showExtend && !showFail" class="flex flex-wrap gap-2">
+                                <button @click="showSubmit = true" class="flex-1 py-2 bg-green-500 text-black font-black text-[10px] uppercase tracking-widest hover:bg-white transition-all shadow-[0_0_15px_rgba(34,197,94,0.3)]">Mission Accomplished (Bajarildi)</button>
+                                <button @click="showExtend = true" class="px-4 py-2 bg-yellow-500/10 border border-yellow-500/50 text-yellow-500 font-black text-[10px] uppercase tracking-widest hover:bg-yellow-500 hover:text-black transition-all">Request Delay (Jarayonda)</button>
+                                <button @click="showFail = true" class="px-4 py-2 bg-red-500/10 border border-red-500/50 text-red-500 font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Abort (Bajarilmadi)</button>
+                            </div>
+
+                            <form x-show="showSubmit" method="POST" action="{{ route('chat.task.submit', $task->id) }}" enctype="multipart/form-data" class="space-y-3" style="display: none;">
                                 @csrf
-                                <div>
-                                    <label class="block text-[var(--text-color)] opacity-70 mb-0.5 text-xs uppercase tracking-widest">Xodim</label>
-                                    <select name="assigned_to" required class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] p-1.5 text-[var(--text-color)] focus:border-[var(--cyber-yellow)] focus:outline-none text-sm appearance-none">
-                                        @foreach($users as $u)
-                                            <option value="{{ $u->id }}" {{ $task->assigned_to == $u->id ? 'selected' : '' }}>{{ $u->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-[var(--text-color)] opacity-70 mb-0.5 text-xs uppercase tracking-widest">Vazifa Nomi</label>
-                                    <input type="text" name="title" value="{{ $task->title }}" required class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] p-1.5 text-[var(--text-color)] focus:border-[var(--cyber-yellow)] focus:outline-none text-sm uppercase">
-                                </div>
-                                <div>
-                                    <label class="block text-[var(--text-color)] opacity-70 mb-0.5 text-xs uppercase tracking-widest">Qo'shimcha</label>
-                                    <textarea name="description" required rows="2" class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] p-1.5 text-[var(--text-color)] focus:border-[var(--cyber-yellow)] focus:outline-none text-sm uppercase resize-none">{{ $task->description }}</textarea>
-                                </div>
-                                <div class="grid grid-cols-3 gap-2">
-                                    <div>
-                                        <label class="block text-red-500 mb-0.5 text-xs uppercase tracking-widest">Jarima UZS</label>
-                                        <input type="number" name="fine_amount" value="{{ $task->fine_amount }}" required class="w-full bg-[var(--bg-color)] border border-red-500 border-opacity-50 p-1.5 text-red-500 focus:border-red-500 focus:outline-none text-sm font-bold">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[var(--cyber-yellow)] mb-0.5 text-xs uppercase tracking-widest">XP Reward</label>
-                                        <input type="number" name="xp_reward" value="{{ $task->xp_reward }}" required class="w-full bg-[var(--bg-color)] border border-[var(--cyber-yellow)] border-opacity-50 p-1.5 text-[var(--cyber-yellow)] focus:border-[var(--cyber-yellow)] focus:outline-none text-sm font-bold">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[var(--text-color)] opacity-70 mb-0.5 text-xs uppercase tracking-widest">Muddat</label>
-                                        <input type="datetime-local" name="deadline" value="{{ \Carbon\Carbon::parse($task->deadline)->format('Y-m-d\TH:i') }}" required class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] p-1.5 text-[var(--text-color)] focus:border-[var(--cyber-yellow)] focus:outline-none text-sm">
+                                <input type="hidden" name="status" value="done">
+                                <div class="bg-black/60 p-4 border border-green-500/30">
+                                    <label class="block text-[10px] font-black text-green-400 uppercase mb-2">Upload Mission Evidence (PDF, PNG, JPG)</label>
+                                    <input type="file" name="proof_file" required class="block w-full text-xs text-white/40 file:mr-4 file:py-2 file:px-4 file:rounded-none file:border-0 file:text-[10px] file:font-black file:bg-green-500 file:text-black hover:file:bg-white">
+                                    <div class="flex gap-2 mt-4">
+                                        <button type="submit" class="flex-1 py-2 bg-green-500 text-black font-black text-[10px] uppercase">Upload & Submit</button>
+                                        <button type="button" @click="showSubmit = false" class="px-4 py-2 border border-white/10 text-white/50 text-[10px] uppercase">Cancel</button>
                                     </div>
                                 </div>
-                                <div class="flex gap-2 justify-end mt-2 pt-2 border-t border-[var(--border-color)] border-opacity-30">
-                                    <button type="button" @click="editingTask = false" class="px-2 py-1 bg-transparent border border-[var(--border-color)] text-[var(--text-color)] text-xs hover:text-[var(--cyber-yellow)] transition-colors uppercase tracking-widest">Bekor</button>
-                                    <button type="submit" class="px-2 py-1 bg-[var(--cyber-yellow)] text-[var(--bg-color)] font-bold text-xs hover:bg-transparent hover:text-[var(--cyber-yellow)] border border-transparent hover:border-[var(--cyber-yellow)] transition-colors uppercase tracking-widest">Saqlash</button>
+                            </form>
+
+                            <form x-show="showExtend" method="POST" action="{{ route('chat.task.submit', $task->id) }}" class="space-y-3" style="display: none;">
+                                @csrf
+                                <input type="hidden" name="status" value="in_progress">
+                                <div class="bg-black/60 p-4 border border-yellow-500/30">
+                                    <label class="block text-[10px] font-black text-yellow-500 uppercase mb-2">Extension Reason</label>
+                                    <textarea name="extension_reason" required class="w-full bg-black/40 border border-white/10 p-2 text-white text-xs uppercase placeholder-opacity-20 resize-none" placeholder="WHY_DO_YOU_NEED_MORE_TIME?"></textarea>
+                                    <div class="flex gap-2 mt-4">
+                                        <button type="submit" class="flex-1 py-2 bg-yellow-500 text-black font-black text-[10px] uppercase">Submit Request</button>
+                                        <button type="button" @click="showExtend = false" class="px-4 py-2 border border-white/10 text-white/50 text-[10px] uppercase">Cancel</button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <form x-show="showFail" method="POST" action="{{ route('chat.task.submit', $task->id) }}" class="space-y-3" style="display: none;">
+                                @csrf
+                                <input type="hidden" name="status" value="failed">
+                                <div class="bg-black/60 p-4 border border-red-500/30">
+                                    <label class="block text-[10px] font-black text-red-500 uppercase mb-2">Failure Reason</label>
+                                    <textarea name="extension_reason" required class="w-full bg-black/40 border border-white/10 p-2 text-white text-xs uppercase placeholder-opacity-20 resize-none" placeholder="WHY_WAS_IT_ABORTED?"></textarea>
+                                    <div class="flex gap-2 mt-4">
+                                        <button type="submit" class="flex-1 py-2 bg-red-500 text-white font-black text-[10px] uppercase">Submit Failure</button>
+                                        <button type="button" @click="showFail = false" class="px-4 py-2 border border-white/10 text-white/50 text-[10px] uppercase">Cancel</button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
                         @endif
+
+                        <!-- Action Controls (Admin / Cashier) -->
+                        @if((auth()->user()->role === 'admin' || auth()->user()->role === 'cashier') && $task->status != 'completed')
+                            <div x-data="{ showExtendAdmin: false }" class="mt-4 pt-4 border-t border-white/5">
+                                <div x-show="!showExtendAdmin" class="flex gap-2">
+                                    @if($task->status == 'awaiting_verification')
+                                        <form method="POST" action="{{ route('chat.task.verify', $task->id) }}" class="flex-1 flex gap-2">
+                                            @csrf
+                                            <input type="hidden" name="action" value="approve">
+                                            <button type="submit" class="flex-1 py-2 bg-cyan-400 text-black font-black text-[10px] uppercase tracking-widest hover:bg-white transition-all shadow-[0_0_15px_rgba(0,240,255,0.3)]">Verify & Release Reward</button>
+                                            <button type="submit" name="action" value="reject" class="px-4 py-2 border border-red-500 text-red-500 font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Reject Proof</button>
+                                        </form>
+                                    @endif
+
+                                    <button @click="showExtendAdmin = true" class="flex-1 py-2 border border-yellow-500/30 text-yellow-500 font-black text-[9px] uppercase tracking-widest hover:bg-yellow-500 hover:text-black transition-all">Manage Timeline (Extend)</button>
+
+                                    @if(auth()->user()->role === 'admin')
+                                        <form method="POST" action="{{ route('chat.task.delete', $task->id) }}" onsubmit="return confirm('Wipe Directive Permanently?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-1 px-3 border border-red-500/20 text-red-500/50 hover:bg-red-500 hover:text-white transition-all"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+                                        </form>
+                                    @endif
+                                </div>
+
+                                <div x-show="showExtendAdmin" class="bg-black/60 p-4 border border-yellow-500/30 mt-2" style="display: none;">
+                                    <form method="POST" action="{{ route('chat.task.verify', $task->id) }}">
+                                        @csrf
+                                        <input type="hidden" name="action" value="extend">
+                                        <label class="block text-[10px] font-black text-yellow-400 uppercase mb-2">Adjust Sync Deadline</label>
+                                        <input type="datetime-local" name="new_deadline" required class="w-full bg-black/40 border border-white/10 p-2 text-white text-xs">
+                                        <div class="flex gap-2 mt-4">
+                                            <button type="submit" class="flex-1 py-2 bg-yellow-500 text-black font-black text-[10px] uppercase">Extend Mission</button>
+                                            <button type="button" @click="showExtendAdmin = false" class="px-4 py-2 border border-white/10 text-white/50 text-[10px] uppercase">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        @endif
+
                     </div>
                 @empty
-                    <div class="flex flex-col items-center justify-center text-[var(--text-color)] py-10 opacity-40">
-                        <svg class="w-10 h-10 mb-2 text-[var(--cyber-yellow)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                        <p class="text-sm font-bold uppercase tracking-widest text-[var(--text-color)]">Yangi vazifalar yo'q</p>
-                        <p class="text-xs mt-1 font-mono uppercase tracking-widest">> RELAXING_MODE=1</p>
+                    <div class="flex flex-col items-center justify-center text-white/20 py-20 bg-white/[0.01] border border-dashed border-white/5 rounded-2xl">
+                        <i class="fa-solid fa-ghost text-5xl mb-4"></i>
+                        <p class="text-xs font-black uppercase tracking-[0.4em]">Zero Directives</p>
                     </div>
                 @endforelse
             </div>
@@ -343,6 +420,43 @@
 </div>
 
 <script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('taskComponent', (deadline, status) => ({
+            deadline: new Date(deadline).getTime(),
+            status: status,
+            timeLeft: 0,
+            countdownText: '00:00:00',
+            timer: null,
+
+            init() {
+                this.updateCountdown();
+                this.timer = setInterval(() => {
+                    this.updateCountdown();
+                }, 1000);
+            },
+
+            updateCountdown() {
+                const now = new Date().getTime();
+                this.timeLeft = Math.max(0, this.deadline - now);
+                
+                if (this.timeLeft <= 0) {
+                    this.countdownText = 'FAILED';
+                    clearInterval(this.timer);
+                    return;
+                }
+
+                const hours = Math.floor(this.timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((this.timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((this.timeLeft % (1000 * 60)) / 1000);
+
+                this.countdownText = 
+                    String(hours).padStart(2, '0') + ':' + 
+                    String(minutes).padStart(2, '0') + ':' + 
+                    String(seconds).padStart(2, '0');
+            }
+        }));
+    });
+
     document.addEventListener("DOMContentLoaded", function() {
         var chatDiv = document.getElementById("chat-container");
         if(chatDiv) {
@@ -350,5 +464,4 @@
         }
     });
 </script>
-
 @endsection

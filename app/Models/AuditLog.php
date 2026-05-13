@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class AuditLog extends Model
 {
+    use \App\Traits\BelongsToCompany;
+
     protected $guarded = [];
 
     protected $casts = [

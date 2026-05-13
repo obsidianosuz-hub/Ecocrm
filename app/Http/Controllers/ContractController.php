@@ -21,6 +21,7 @@ class ContractController extends Controller
             'services_json' => 'required|string', // Comes as JSON string from Alpine
             'amount' => 'required|numeric|min:0',
             'pfc_file' => 'nullable|file',
+            'operator_share_percentage' => 'required|numeric|min:0|max:100',
         ]);
 
         if ($validator->fails()) {
@@ -85,7 +86,7 @@ class ContractController extends Controller
             'amount' => $validated['amount'],
             'cost_price' => $totalCost,
             'payment_method' => $validated['payment_method'],
-            'operator_share_percentage' => 10, // Default for now
+            'operator_share_percentage' => $validated['operator_share_percentage'],
             'custom_type' => count($items) > 1 ? 'Multiple Services' : $primaryService['type'],
             'services_json' => $items,
             'status' => 'pending',

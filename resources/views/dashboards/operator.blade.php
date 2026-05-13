@@ -180,11 +180,14 @@
                                 <span class="text-cyan-400 text-lg font-black" x-text="new Intl.NumberFormat('uz-UZ').format(totalAmount) + ' UZS'"></span>
                             </div>
 
-                            <select name="payment_method" class="w-full bg-black/60 border border-white/5 rounded-lg p-2.5 text-[10px] text-white focus:border-cyan-400/40 outline-none font-bold uppercase" required>
-                                <option value="" disabled selected>Payment Method</option>
-                                <option value="card">💳 Card</option>
-                                <option value="cash">💵 Cash</option>
-                            </select>
+                            <div class="flex gap-2">
+                                <select name="payment_method" class="w-2/3 bg-black/60 border border-white/5 rounded-lg p-2.5 text-[10px] text-white focus:border-cyan-400/40 outline-none font-bold uppercase" required>
+                                    <option value="" disabled selected>Payment Method</option>
+                                    <option value="card">💳 Card</option>
+                                    <option value="cash">💵 Cash</option>
+                                </select>
+                                <input type="number" name="operator_share_percentage" min="0" max="100" class="w-1/3 bg-purple-500/10 border border-purple-500/30 rounded-lg p-2.5 text-[10px] text-purple-400 focus:border-purple-400/50 outline-none font-bold uppercase placeholder:text-purple-400/50" required placeholder="Ulush (%)" x-model="operatorShare">
+                            </div>
                         </div>
 
                         <datalist id="serviceTypesList">
@@ -437,6 +440,7 @@
             isSubmitting: false,
             items: [{ name: '', type: 'Consulting', cost: '', price: '' }],
             totalAmount: 0,
+            operatorShare: '',
             serviceType: 'Consulting',
             
             addServiceRow() {
@@ -582,6 +586,7 @@
                         if(jsonStatus.success) {
                             form.reset();
                             this.serviceType = 'Consulting';
+                            this.operatorShare = '';
                             this.fetchStats();
                             this.speakUzbek("Shartnoma muvaffaqiyatli markaziy bazaga saqlandi.");
                         } else {

@@ -115,7 +115,9 @@ class StaffController extends Controller
             'avatar' => $avatarPath,
             'allowed_ip' => $request->allowed_ip,
             'work_start_time' => $request->work_start_time ?? '09:00:00',
-            'work_end_time' => $request->work_end_time ?? '18:00:00'
+            'work_end_time' => $request->work_end_time ?? '18:00:00',
+            'company_id' => auth()->user()->company_id,
+            'approval_status' => 'approved'
         ]);
         
         AuditLog::create([

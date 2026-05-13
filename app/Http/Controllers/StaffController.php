@@ -107,7 +107,8 @@ class StaffController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
-            'salary' => $request->salary ?? 0,
+            'fixed_salary' => $request->fixed_salary ?? 0,
+            'salary' => 0,
             'bonus' => $request->bonus ?? 0,
             'internal_id' => 'PND-' . rand(100, 999),
             'face_id_token' => $faceIdPath,
@@ -145,6 +146,7 @@ class StaffController extends Controller
             'avatar' => 'nullable|image|max:10240',
             'face_id_image' => 'nullable|image|max:10240',
             'pin_code' => 'nullable|string|max:10',
+            'fixed_salary' => 'nullable|numeric',
         ]);
 
         if ($request->hasFile('avatar')) {
@@ -170,6 +172,10 @@ class StaffController extends Controller
         if ($request->filled('work_start_time')) $user->work_start_time = $request->work_start_time;
         if ($request->filled('work_end_time')) $user->work_end_time = $request->work_end_time;
         
+        if ($request->has('fixed_salary')) {
+            $user->fixed_salary = $request->fixed_salary;
+        }
+
         $user->save();
 
         AuditLog::create([

@@ -155,7 +155,8 @@
                                     pin_code: '{{ $user->pin_code }}',
                                     work_start_time: '{{ substr($user->work_start_time, 0, 5) }}',
                                     work_end_time: '{{ substr($user->work_end_time, 0, 5) }}',
-                                    allowed_ip: '{{ $user->allowed_ip }}'
+                                    allowed_ip: '{{ $user->allowed_ip }}',
+                                    fixed_salary: {{ $user->fixed_salary ?? 0 }}
                                 }; showEditModal = true;" class="text-sm bg-gray-800 hover:bg-[var(--active-color)] hover:text-black px-2 py-1 font-bold uppercase tracking-widest transition-all">Tahrirlash</button>
                                 
                                 @if($user->role !== 'admin' && $user->id !== auth()->id())
@@ -200,7 +201,7 @@
                                 <div class="text-xs opacity-40 uppercase">{{ $user->role }}</div>
                             </td>
                             <td class="py-4 font-bold text-[var(--active-color)]">
-                                {{ number_format($user->salary, 0, ',', ' ') }} <span class="text-sm opacity-50">UZS</span>
+                                {{ number_format($user->fixed_salary ?? 0, 0, ',', ' ') }} <span class="text-sm opacity-50">UZS</span>
                             </td>
                             <td class="py-4 text-center">
                                 <div class="text-green-500">+{{ number_format($user->bonus, 0) }}</div>
@@ -394,8 +395,8 @@
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block opacity-50 mb-1">Boshlang'ich Maosh</label>
-                        <input type="number" name="salary" class="w-full bg-black border border-gray-700 p-2 text-white focus:border-[var(--active-color)] outline-none">
+                        <label class="block opacity-50 mb-1">Boshlang'ich Maosh (UZS)</label>
+                        <input type="number" name="fixed_salary" class="w-full bg-black border border-gray-700 p-2 text-white focus:border-[var(--active-color)] outline-none">
                     </div>
                     <div>
                         <label class="block opacity-50 mb-1">Maxsus PIN-KOD</label>
@@ -468,10 +469,14 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label class="block opacity-50 mb-1">PIN-KOD</label>
                         <input type="text" name="pin_code" x-model="editUser.pin_code" class="w-full bg-black border border-gray-700 p-2 text-white focus:border-[var(--cyber-yellow)] outline-none">
+                    </div>
+                    <div>
+                        <label class="block opacity-50 mb-1">Oylik Maosh (UZS)</label>
+                        <input type="number" name="fixed_salary" x-model="editUser.fixed_salary" class="w-full bg-black border border-gray-700 p-2 text-white focus:border-[var(--cyber-yellow)] outline-none">
                     </div>
                     <div>
                         <label class="block opacity-50 mb-1">Ish Boshlash</label>

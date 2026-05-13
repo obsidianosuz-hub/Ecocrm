@@ -124,10 +124,17 @@ class ShiftController extends Controller
         $workSeconds = max(0, $totalSeconds - $pauseSeconds);
         $hoursWorked = $workSeconds / 3600;
         
-        // Base rate: 15,000 UZS per hour
-        $earnedSalary = $hoursWorked * 15000;
+        // Calculate hourly rate based on standard 192 hours/month (24 days * 8 hours)
+        $earnedSalary = 0;
+        if ($user->fixed_salary > 0) {
+            $hourlyRate = $user->fixed_salary / 192;
+            $earnedSalary = $hoursWorked * $hourlyRate;
+        }
         
-        $user->salary += $earnedSalary;
+        if ($earnedSalary > 0) {
+            $user->salary += $earnedSalary;
+        }
+
         $user->status = 'offline';
         $user->save();
 

@@ -13,7 +13,6 @@ class DashboardController extends Controller
 {
     public function admin()
     {
-        if (auth()->user()->is_master) return redirect()->route('master.dashboard');
         if (auth()->user()->role !== 'admin') abort(403);
         
         $totalTreasury = Transaction::forCompany()->where('type', 'income')->sum('amount') - Transaction::forCompany()->where('type', 'expense')->sum('amount');

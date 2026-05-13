@@ -13,8 +13,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::group(['prefix' => 'master', 'middleware' => 'can:master-access'], function() {
         Route::get('/dashboard', [App\Http\Controllers\Master\AdminController::class, 'index'])->name('master.dashboard');
         Route::post('/companies/{company}/approve', [App\Http\Controllers\Master\AdminController::class, 'approveCompany'])->name('master.companies.approve');
+        Route::post('/companies/{company}/suspend', [App\Http\Controllers\Master\AdminController::class, 'suspendCompany'])->name('master.companies.suspend');
+        Route::delete('/companies/{company}', [App\Http\Controllers\Master\AdminController::class, 'destroyCompany'])->name('master.companies.destroy');
     });
     Route::get('/dashboard', function () {
+        if (auth()->user()->is_master) {
+            return redirect()->route('master.dashboard');
+        }
         return redirect()->route(auth()->user()->role . '.dashboard');
     })->name('dashboard');
 

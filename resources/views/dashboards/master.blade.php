@@ -1,5 +1,16 @@
 @extends('layouts.cyber')
 
+@section('sidebar')
+    <a href="{{ route('master.dashboard') }}" class="nav-item {{ request()->routeIs('master.dashboard') ? 'active' : '' }}">
+        <i class="fa-solid fa-server text-purple-400"></i>
+        <span>MASTER COMMAND</span>
+    </a>
+    <a href="{{ route('admin.dashboard') }}" class="nav-item">
+        <i class="fa-solid fa-gauge-high text-cyan-400"></i>
+        <span>KOMPANIYA BOSHQARUVI</span>
+    </a>
+@endsection
+
 @section('content')
 <div class="flex-1 min-h-0 flex flex-col gap-8 overflow-hidden">
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 shrink-0 px-4">
@@ -98,9 +109,20 @@
                                 </td>
                                 <td class="py-4 px-4 text-white/40" x-text="'{{ $company->created_at->format('Y-m-d H:i') }}'"></td>
                                 <td class="py-4 px-4">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
-                                        <span class="text-[9px] font-black text-green-400 uppercase tracking-widest">Online</span>
+                                    <div class="flex items-center gap-4">
+                                        <div class="flex items-center gap-2 mr-4">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
+                                            <span class="text-[9px] font-black text-green-400 uppercase tracking-widest">Online</span>
+                                        </div>
+                                        <form action="{{ route('master.companies.suspend', $company->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="text-[10px] text-yellow-400 hover:text-yellow-300 font-bold uppercase tracking-widest px-2" title="Bloklash"><i class="fa-solid fa-ban"></i></button>
+                                        </form>
+                                        <form action="{{ route('master.companies.destroy', $company->id) }}" method="POST" class="inline" onsubmit="return confirm('Kompaniyani o\'chirish barcha ma\'lumotlarni yo\'qotadi. Ishonchingiz komilmi?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-[10px] text-red-500 hover:text-red-400 font-bold uppercase tracking-widest px-2" title="O'chirish"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

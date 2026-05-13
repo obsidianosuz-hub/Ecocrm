@@ -27,4 +27,25 @@ class AdminController extends Controller
             
         return back()->with('success', 'Kompaniya va uning administratori muvaffaqiyatli tasdiqlandi!');
     }
+
+    public function suspendCompany($id)
+    {
+        $company = \App\Models\Company::findOrFail($id);
+        $company->update(['status' => 'suspended']);
+        
+        \App\Models\User::where('company_id', $company->id)
+            ->update(['status' => 'blocked']);
+            
+        return back()->with('success', 'Kompaniya faoliyati vaqtinchalik to\'xtatildi!');
+    }
+
+    public function destroyCompany($id)
+    {
+        $company = \App\Models\Company::findOrFail($id);
+        
+        \App\Models\User::where('company_id', $company->id)->delete();
+        $company->delete();
+            
+        return back()->with('success', 'Kompaniya butunlay o\'chirildi!');
+    }
 }

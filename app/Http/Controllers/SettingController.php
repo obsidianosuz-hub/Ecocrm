@@ -21,9 +21,9 @@ class SettingController extends Controller
         if (auth()->user()->role !== 'admin') abort(403);
 
         $request->validate([
-            'company_logo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,ico|max:2048',
-            'bg_image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,ico|max:5120',
-            'user_avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,ico|max:2048',
+            'company_logo_file' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,ico,webp|max:5120',
+            'bg_image_file' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,ico,webp|max:5120',
+            'user_avatar' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,ico,webp|max:5120',
         ]);
 
         if ($request->hasFile('company_logo_file')) {

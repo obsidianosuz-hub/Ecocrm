@@ -16,6 +16,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $companyName }} | Obsidian OS v1</title>
     
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#00ffcc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Obsidian OS">
+    <link rel="apple-touch-icon" href="/icon-512.png">
+    
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -72,8 +80,7 @@
         .dynamic-island {
             position: fixed;
             top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
+            right: 20px;
             background: #000000;
             border: 1px solid var(--glass-border);
             border-radius: 40px;
@@ -165,6 +172,7 @@
             .mobile-header { display: flex; }
             .main-container { padding: 75px 15px 15px 15px; }
             .content-row { grid-template-columns: 1fr; }
+            .dynamic-island { left: 50%; transform: translateX(-50%); right: auto; min-width: 150px; }
         }
 
         /* Scrollbar styling */
@@ -189,6 +197,24 @@
         .font-orbitron { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.95em; }
         .slim-scroll::-webkit-scrollbar { width: 3px; }
         .slim-scroll::-webkit-scrollbar-thumb { background: rgba(0, 255, 204, 0.4); border-radius: 10px; }
+
+        /* PWA specific fixes */
+        @media (max-width: 640px) {
+            .stat-card { padding: 15px; }
+            .stat-value { font-size: 20px; }
+            .panel-title { font-size: 13px; }
+            .btn-ios { padding: 10px 14px; font-size: 11px; }
+            input, select, textarea { font-size: 16px !important; } /* Prevents iOS zoom on focus */
+        }
+
+        .install-btn {
+            display: none;
+            margin: 10px;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            color: black !important;
+            border: none;
+            font-weight: 800;
+        }
     </style>
 </head>
 <body class="antialiased" x-data="cyberSystem()">
@@ -254,6 +280,9 @@
             @yield('sidebar')
             
             <form method="POST" action="{{ route('logout') }}" id="logout-form" class="hidden">@csrf</form>
+            <button id="installApp" class="nav-item install-btn">
+                <i class="fa-solid fa-download"></i> ILOVANI O'RNATISH
+            </button>
             <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-item mt-auto" style="color: var(--neon-pink);">
                 <i class="fa-solid fa-power-off"></i> Chiqish
             </a>
@@ -295,6 +324,42 @@
                     }, 3000);
                 }
             }));
+        });
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered:', reg))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
+        }
+
+        // PWA Install Logic
+        let deferredPrompt;
+        const installBtn = document.getElementById('installApp');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (installBtn) installBtn.style.display = 'flex';
+        });
+
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installBtn.style.display = 'none';
+                }
+                deferredPrompt = null;
+            });
+        }
+
+        window.addEventListener('appinstalled', () => {
+            if (installBtn) installBtn.style.display = 'none';
+            deferredPrompt = null;
         });
     </script>
 </body>

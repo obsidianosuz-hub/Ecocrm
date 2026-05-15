@@ -20,12 +20,20 @@ class SetLocale
                 return config('app.locale');
             });
 
-            $locale = $globalLocale;
-            if (auth()->check() && auth()->user()->ui_language) {
+            $locale = session('locale');
+
+            if (!$locale && auth()->check() && auth()->user()->ui_language) {
                 $locale = auth()->user()->ui_language;
             }
 
+            if (!$locale) {
+                $locale = $globalLocale;
+            }
+
             app()->setLocale($locale);
+            if (config('app.locale') !== $locale) {
+                config(['app.locale' => $locale]);
+            }
         } catch (\Exception $e) {
             // Fallback
         }

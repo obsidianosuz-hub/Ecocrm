@@ -28,6 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $user->ui_language = $request->locale;
         $user->save();
         session()->put('locale', $request->locale);
+        session()->save();
         return back();
     })->name('locale.change');
 

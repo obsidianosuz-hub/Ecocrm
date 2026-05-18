@@ -16,8 +16,8 @@ class DashboardController extends Controller
         if (auth()->user()->role !== 'admin') abort(403);
         
         $totalTreasury = Transaction::forCompany()->where('type', 'income')->sum('amount') - Transaction::forCompany()->where('type', 'expense')->sum('amount');
-        $dailyIncome = Transaction::forCompany()->where('type', 'income')->whereDate('created_at', today())->sum('amount');
-        $dailyExpense = Transaction::forCompany()->where('type', 'expense')->whereDate('created_at', today())->sum('amount');
+        $dailyIncome = Transaction::forCompany()->where('type', 'income')->where('created_at', '>=', today())->sum('amount');
+        $dailyExpense = Transaction::forCompany()->where('type', 'expense')->where('created_at', '>=', today())->sum('amount');
         
         $activeOperators = User::forCompany()->where('role', 'operator')->where('status', 'online')->count();
         $totalOperators = User::forCompany()->where('role', 'operator')->count();
@@ -44,8 +44,8 @@ class DashboardController extends Controller
         if (auth()->user()->role !== 'admin') return response()->json(['error' => 'Unauthorized'], 403);
         
         $totalTreasury = Transaction::forCompany()->where('type', 'income')->sum('amount') - Transaction::forCompany()->where('type', 'expense')->sum('amount');
-        $dailyIncome = Transaction::forCompany()->where('type', 'income')->whereDate('created_at', today())->sum('amount');
-        $dailyExpense = Transaction::forCompany()->where('type', 'expense')->whereDate('created_at', today())->sum('amount');
+        $dailyIncome = Transaction::forCompany()->where('type', 'income')->where('created_at', '>=', today())->sum('amount');
+        $dailyExpense = Transaction::forCompany()->where('type', 'expense')->where('created_at', '>=', today())->sum('amount');
         
         $activeOperators = User::forCompany()->where('role', 'operator')->where('status', 'online')->count();
         $totalOperators = User::forCompany()->where('role', 'operator')->count();
@@ -90,7 +90,7 @@ class DashboardController extends Controller
 
         $services = Service::forCompany()->get();
         $myContracts = Contract::forCompany()->where('user_id', auth()->id())
-            ->whereDate('created_at', today())
+            ->where('created_at', '>=', today())
             ->get();
             
         $activeShift = \App\Models\Shift::where('user_id', auth()->id())->whereNull('ended_at')->first();
@@ -122,12 +122,12 @@ class DashboardController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
             
-        $dailyReceipts = Transaction::forCompany()->where('type', 'income')->whereDate('created_at', today())->sum('amount');
-        $dailyProfit = Contract::forCompany()->where('status', 'approved')->whereDate('created_at', today())->get()->sum(function($c) {
+        $dailyReceipts = Transaction::forCompany()->where('type', 'income')->where('created_at', '>=', today())->sum('amount');
+        $dailyProfit = Contract::forCompany()->where('status', 'approved')->where('created_at', '>=', today())->get()->sum(function($c) {
             return $c->amount - $c->cost_price;
         });
         
-        $manualExpenses = Transaction::forCompany()->where('type', 'expense')->whereDate('created_at', today())->sum('amount');
+        $manualExpenses = Transaction::forCompany()->where('type', 'expense')->where('created_at', '>=', today())->sum('amount');
         
         $cashIncome = Transaction::forCompany()->where('type', 'income')->where('payment_method', 'cash')->sum('amount');
         $cashExpense = Transaction::forCompany()->where('type', 'expense')->where('payment_method', 'cash')->sum('amount');
@@ -155,11 +155,19 @@ class DashboardController extends Controller
 
 
         // Reports: staff performance today
-        $operatorsToday = User::forCompany()->where('role', 'operator')->get()->map(function($op) {
-            $approvedContracts = Contract::forCompany()->where('user_id', $op->id)->whereDate('created_at', today())->where('status', 'approved')->get();
-            $op->today_deals = $approvedContracts->count();
-            $op->today_revenue = $approvedContracts->sum('amount');
-            $op->today_profit = $approvedContracts->sum(function($c) { return $c->amount - $c->cost_price; });
+        $operators = User::forCompany()->where('role', 'operator')->get();
+        $todayApprovedContracts = Contract::forCompany()
+            ->whereIn('user_id', $operators->pluck('id'))
+            ->where('created_at', '>=', today())
+            ->where('status', 'approved')
+            ->get()
+            ->groupBy('user_id');
+
+        $operatorsToday = $operators->map(function($op) use ($todayApprovedContracts) {
+            $opContracts = $todayApprovedContracts->get($op->id, collect());
+            $op->today_deals = $opContracts->count();
+            $op->today_revenue = $opContracts->sum('amount');
+            $op->today_profit = $opContracts->sum(function($c) { return $c->amount - $c->cost_price; });
             return $op;
         })->sortByDesc('today_revenue');
 

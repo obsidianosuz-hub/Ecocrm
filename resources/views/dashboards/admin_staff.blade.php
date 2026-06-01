@@ -5,74 +5,8 @@
 @endsection
 
 @section('content')
-<div x-data="{ 
-    activeTab: 'roster', 
-    showAddModal: false, 
-    showEditModal: false, 
-    showBalanceModal: false,
-    balanceUser: { id: null, name: '', balance: 0, debt: 0 },
-    editUser: { id: null, name: '', email: '', role: '', pin_code: '', work_start_time: '', work_end_time: '', allowed_ip: '' },
-    printBadge(user) {
-        const avatarSrc = user.avatar
-            ? (user.avatar.startsWith('http') ? user.avatar : window.location.origin + '/' + user.avatar.replace(/^\//, ''))
-            : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&size=200&background=111&color=00ffcc';
+<div x-data="staffManager" class="flex flex-col h-full">
 
-        const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent((user.internal_id || '') + ':' + (user.pin_code || ''))}`;
-
-        const html = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Badge - ${user.name}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #fff; color: #000; font-family: 'JetBrains Mono', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-        .badge { border: 2px solid #000; padding: 24px; border-radius: 12px; width: 320px; text-align: center; }
-        .header { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 16px; border-bottom: 2px solid #000; padding-bottom: 8px; letter-spacing: 2px; }
-        .avatar { width: 100px; height: 100px; border: 2px solid #000; margin: 0 auto 12px; display: block; object-fit: cover; border-radius: 4px; }
-        .name { font-size: 18px; font-weight: 700; text-transform: uppercase; margin: 8px 0 4px; letter-spacing: 1px; }
-        .role { font-size: 12px; font-weight: 700; color: #555; border: 1px solid #555; display: inline-block; padding: 2px 12px; margin-bottom: 12px; letter-spacing: 2px; }
-        .details { font-size: 10px; text-align: left; background: #f5f5f5; padding: 10px; border-radius: 6px; line-height: 1.8; border: 1px solid #ddd; }
-        .details div { display: flex; justify-content: space-between; }
-        .details b { color: #000; }
-        .qr { margin-top: 16px; }
-        .qr img { width: 80px; height: 80px; }
-        .print-btn { margin-top: 24px; padding: 12px 32px; cursor: pointer; background: #000; color: #fff; border: none; font-weight: 700; font-size: 14px; border-radius: 6px; letter-spacing: 2px; }
-        @media print { .print-btn { display: none; } body { padding: 0; } }
-    </style>
-</head>
-<body>
-    <div class="badge">
-        <div class="header">&#9670; OBSIDIAN OS &#9670;</div>
-        <img src="${avatarSrc}" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&size=200'">
-        <div class="name">${user.name}</div>
-        <div class="role">${(user.role || '').toUpperCase()}</div>
-        <div class="details">
-            <div><b>SYSTEM-ID:</b><span>${user.internal_id || 'N/A'}</span></div>
-            <div><b>LOGIN:</b><span>${user.email || '-'}</span></div>
-            <div><b>PIN-CODE:</b><span>${user.pin_code || '****'}</span></div>
-            <div><b>SHEDULE:</b><span>${user.work_start_time || '--'} - ${user.work_end_time || '--'}</span></div>
-            <div><b>STATUS:</b><span>ACTIVE</span></div>
-        </div>
-        <div class="qr"><img src="${qrSrc}" alt="QR"></div>
-    </div>
-    <button class="print-btn" onclick="window.print()">&#128438; CHOP ETISH</button>
-    <script>window.onload = function() { setTimeout(function(){ window.print(); }, 800); }<\/script>
-</body>
-</html>`;
-
-        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const win = window.open(url, '_blank', 'width=420,height=650,scrollbars=yes');
-        if (!win) {
-            alert("Brauzer pop-up ni blokladi! Iltimos, bu sayt uchun pop-up ruxsat bering va qayta urining.");
-            return;
-        }
-        win.focus();
-        setTimeout(() => URL.revokeObjectURL(url), 60000);
-    }
-}" class="flex flex-col h-full">
 
     <!-- Header Section -->
     <div class="mb-4 md:mb-6 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[var(--active-color)] pb-4 gap-4 relative">
@@ -597,4 +531,77 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('staffManager', () => ({
+        activeTab: 'roster',
+        showAddModal: false,
+        showEditModal: false,
+        showBalanceModal: false,
+        balanceUser: { id: null, name: '', balance: 0, debt: 0 },
+        editUser: { id: null, name: '', email: '', role: '', pin_code: '', work_start_time: '', work_end_time: '', allowed_ip: '', fixed_salary: 0 },
+
+        printBadge(user) {
+            const avatarSrc = user.avatar
+                ? (user.avatar.startsWith('http') ? user.avatar : window.location.origin + '/' + user.avatar.replace(/^\//, ''))
+                : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&size=200&background=111111&color=00ffcc';
+
+            const qrData = encodeURIComponent((user.internal_id || '') + ':' + (user.pin_code || ''));
+            const qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=' + qrData;
+
+            const lines = [
+                '<!DOCTYPE html>',
+                '<html><head><meta charset="UTF-8">',
+                '<title>Badge - ' + user.name + '</title>',
+                '<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">',
+                '<style>',
+                '* { box-sizing: border-box; margin: 0; padding: 0; }',
+                'body { background: #fff; color: #000; font-family: "JetBrains Mono", monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }',
+                '.badge { border: 2px solid #000; padding: 24px; border-radius: 12px; width: 320px; text-align: center; }',
+                '.hdr { font-family: "Orbitron", sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 14px; border-bottom: 2px solid #000; padding-bottom: 8px; letter-spacing: 2px; }',
+                '.avatar { width: 100px; height: 100px; border: 2px solid #000; margin: 0 auto 12px; display: block; object-fit: cover; border-radius: 4px; }',
+                '.name { font-size: 17px; font-weight: 700; text-transform: uppercase; margin: 8px 0 4px; }',
+                '.role { font-size: 11px; font-weight: 700; color: #555; border: 1px solid #555; display: inline-block; padding: 2px 12px; margin-bottom: 12px; letter-spacing: 2px; }',
+                '.details { font-size: 10px; text-align: left; background: #f5f5f5; padding: 10px; border-radius: 6px; line-height: 1.9; border: 1px solid #ddd; }',
+                '.details .row { display: flex; justify-content: space-between; }',
+                '.qr { margin-top: 14px; }',
+                '.qr img { width: 80px; height: 80px; }',
+                '.pbtn { margin-top: 20px; padding: 10px 28px; cursor: pointer; background: #000; color: #fff; border: none; font-weight: 700; font-size: 13px; border-radius: 6px; letter-spacing: 1px; }',
+                '@media print { .pbtn { display: none; } }',
+                '</style></head><body>',
+                '<div class="badge">',
+                '<div class="hdr">&#9670; OBSIDIAN OS &#9670;</div>',
+                '<img src="' + avatarSrc + '" class="avatar">',
+                '<div class="name">' + user.name + '</div>',
+                '<div class="role">' + (user.role || '').toUpperCase() + '</div>',
+                '<div class="details">',
+                '<div class="row"><b>SYSTEM-ID:</b><span>' + (user.internal_id || 'N/A') + '</span></div>',
+                '<div class="row"><b>LOGIN:</b><span>' + (user.email || '-') + '</span></div>',
+                '<div class="row"><b>PIN-CODE:</b><span>' + (user.pin_code || '****') + '</span></div>',
+                '<div class="row"><b>SHEDULE:</b><span>' + (user.work_start_time || '--') + ' - ' + (user.work_end_time || '--') + '</span></div>',
+                '<div class="row"><b>STATUS:</b><span>ACTIVE</span></div>',
+                '</div>',
+                '<div class="qr"><img src="' + qrSrc + '" alt="QR"></div>',
+                '</div>',
+                '<button class="pbtn" onclick="window.print()">&#128438; CHOP ETISH</button>',
+                '<script>window.onload=function(){setTimeout(function(){window.print();},800);};<\/script>',
+                '</body></html>'
+            ].join('\n');
+
+            const blob = new Blob([lines], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const win = window.open(url, '_blank', 'width=420,height=650,scrollbars=yes');
+            if (!win) {
+                alert('Brauzer pop-up ni blokladi! Iltimos, bu sayt uchun pop-up ruxsat bering va qayta urining.');
+                return;
+            }
+            win.focus();
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+        }
+    }));
+});
+</script>
+
 @endsection
+

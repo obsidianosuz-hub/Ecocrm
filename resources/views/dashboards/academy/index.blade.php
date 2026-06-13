@@ -140,6 +140,9 @@
                         <th class="py-3 px-4 text-center">Bugungi Holat</th>
                         <th class="py-3 px-4 text-center">Haftalik (Keldi)</th>
                         <th class="py-3 px-4 text-center">Oylik (Keldi / Qoldirdi)</th>
+                        <th class="py-3 px-4 text-center text-blue-400">Kunlik Baho</th>
+                        <th class="py-3 px-4 text-center text-blue-400">Haftalik Baho</th>
+                        <th class="py-3 px-4 text-center text-blue-400">Oylik Baho</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -163,10 +166,13 @@
                             <span class="text-green-400 font-mono" title="Keldi/Kechikdi">{{ $stat['monthly_present'] }}</span> <span class="text-white/20">/</span> 
                             <span class="text-red-400 font-mono" title="Kelmadi">{{ $stat['monthly_absent'] }}</span>
                         </td>
+                        <td class="py-3 px-4 text-center font-mono text-blue-400 font-bold">{{ $stat['daily_grade'] }}</td>
+                        <td class="py-3 px-4 text-center font-mono text-blue-400 font-bold">{{ $stat['weekly_grade'] }}</td>
+                        <td class="py-3 px-4 text-center font-mono text-blue-400 font-bold">{{ $stat['monthly_grade'] }}</td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="py-8 text-center text-white/30 italic">Davomat ma'lumotlari yo'q</td>
+                        <td colspan="8" class="py-8 text-center text-white/30 italic">Davomat va baholar ma'lumotlari yo'q</td>
                     </tr>
                     @endforelse
                 </tbody>

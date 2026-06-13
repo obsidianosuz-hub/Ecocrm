@@ -28,6 +28,8 @@ class AcademyController extends Controller
         $attendanceStats = Student::forCompany()
             ->with(['attendances' => function($q) {
                 $q->where('date', '>=', now()->startOfMonth()->format('Y-m-d'));
+            }, 'grades' => function($q) {
+                $q->where('date', '>=', now()->startOfMonth()->format('Y-m-d'));
             }, 'groups'])
             ->get()
             ->map(function($student) {
@@ -43,6 +45,11 @@ class AcademyController extends Controller
                 $monthlyAbsent = $student->attendances->where('date', '>=', $startOfMonth)
                                                       ->where('status', 'absent')->count();
 
+                // Calculate average grades
+                $dailyGrade = $student->grades->where('date', $todayStr)->avg('grade');
+                $weeklyGrade = $student->grades->where('date', '>=', $startOfWeek)->avg('grade');
+                $monthlyGrade = $student->grades->where('date', '>=', $startOfMonth)->avg('grade');
+
                 return [
                     'id' => $student->id,
                     'name' => $student->name,
@@ -51,6 +58,9 @@ class AcademyController extends Controller
                     'weekly_present' => $weeklyPresent,
                     'monthly_present' => $monthlyPresent,
                     'monthly_absent' => $monthlyAbsent,
+                    'daily_grade' => $dailyGrade !== null ? round($dailyGrade, 1) : '-',
+                    'weekly_grade' => $weeklyGrade !== null ? round($weeklyGrade, 1) : '-',
+                    'monthly_grade' => $monthlyGrade !== null ? round($monthlyGrade, 1) : '-',
                 ];
             });
 

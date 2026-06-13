@@ -24,4 +24,14 @@ class Student extends Model
     {
         return $this->hasMany(AcademyPayment::class);
     }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function grades()
+    {
+        return $this->hasMany(Grade::class);
+    }
 }

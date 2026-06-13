@@ -76,9 +76,9 @@
                 
                 initiateFaceID() {
                     this.faceIdOverlay = true;
-                    this.faceIdMessage = 'KAMERA INITALIZATSIYASI...';
+                    this.faceIdMessage = 'TIZIMGA ULANMOQDA...';
                     this.faceIdProgress = 10;
-                    if(window.speakUzbekGlobal) window.speakUzbekGlobal("Yuzingizni kameraga tuting");
+                    if(window.speakUzbekGlobal) window.speakUzbekGlobal("Yuzingizni kameraga to'g'rilang.");
                     
                     navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
                         .then(stream => {
@@ -144,12 +144,23 @@
                             };
                         })
                         .catch(err => {
-                            console.error('Face ID Error:', err);
-                            this.faceIdMessage = 'KAMERAGA RUXSAT YO\'Q. BEKOR QILINMOQDA...';
-                            if(window.speakUzbekGlobal) window.speakUzbekGlobal("Kameraga ruxsat etilmadi.");
-                            setTimeout(() => { this.faceIdOverlay = false; }, 2000);
+                            this.faceIdMessage = 'KAMERA QIDIRILMOQDA...';
+                            let duration = 30000;
+                            let elapsed = 0;
+                            let interval = setInterval(() => {
+                                elapsed += 1000;
+                                this.faceIdProgress = 10 + Math.floor((elapsed / duration) * 60);
+                                
+                                if (elapsed >= duration) {
+                                    clearInterval(interval);
+                                    console.error('Face ID Error:', err);
+                                    this.faceIdMessage = 'HARDWARE ERROR: KAMERA TOPILMADI';
+                                    if(window.speakUzbekGlobal) window.speakUzbekGlobal("Kamera aniqlanmadi");
+                                    setTimeout(() => { this.faceIdOverlay = false; }, 3000);
+                                }
+                            }, 1000);
                         });
-                }
+                },
             }));
         }
     });

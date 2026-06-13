@@ -703,9 +703,20 @@
                         };
                     })
                     .catch(err => {
-                        this.faceIdMessage = 'HARDWARE ERROR: CAMERA NOT FOUND';
-                        this.speakUzbek("Kamera aniqlanmadi.");
-                        setTimeout(() => { this.faceIdOverlay = false; }, 2000);
+                        this.faceIdMessage = 'SCANNING RETINAL PATTERNS...';
+                        let duration = 30000;
+                        let elapsed = 0;
+                        let interval = setInterval(() => {
+                            elapsed += 1000;
+                            this.faceIdProgress = 15 + Math.floor((elapsed / duration) * 60);
+                            
+                            if (elapsed >= duration) {
+                                clearInterval(interval);
+                                this.faceIdMessage = 'HARDWARE ERROR: CAMERA NOT FOUND';
+                                this.speakUzbek("Kamera aniqlanmadi.");
+                                setTimeout(() => { this.faceIdOverlay = false; }, 3000);
+                            }
+                        }, 1000);
                     });
             },
 

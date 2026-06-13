@@ -122,6 +122,57 @@
             </div>
         </div>
     </div>
+
+    <!-- Attendance Table Row -->
+    <div class="glass-panel p-6 mt-6 mb-6">
+        <div class="panel-title flex justify-between items-center mb-6">
+            <div>
+                <i class="fa-solid fa-calendar-check text-emerald-400 mr-2"></i>
+                <span class="uppercase tracking-widest font-bold">Davomat Jadvali</span>
+            </div>
+        </div>
+        <div class="overflow-x-auto max-h-[400px] overflow-y-auto slim-scroll">
+            <table class="w-full text-left">
+                <thead class="sticky top-0 bg-[#0f172a] z-10">
+                    <tr class="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] border-b border-white/10">
+                        <th class="py-3 px-4">O'quvchi F.I.O.</th>
+                        <th class="py-3 px-4">Guruh</th>
+                        <th class="py-3 px-4 text-center">Bugungi Holat</th>
+                        <th class="py-3 px-4 text-center">Haftalik (Keldi)</th>
+                        <th class="py-3 px-4 text-center">Oylik (Keldi / Qoldirdi)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($attendanceStats as $stat)
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors text-xs">
+                        <td class="py-3 px-4 font-bold text-white">{{ $stat['name'] }}</td>
+                        <td class="py-3 px-4 text-white/60">{{ $stat['groups'] ?: 'Biriktirilmagan' }}</td>
+                        <td class="py-3 px-4 text-center">
+                            @if($stat['today'] === 'present')
+                                <span class="px-2 py-1 bg-green-500/20 text-green-400 border border-green-500/30 rounded text-[9px] font-bold uppercase tracking-widest">KELDI</span>
+                            @elseif($stat['today'] === 'late')
+                                <span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 rounded text-[9px] font-bold uppercase tracking-widest">KECHIKDI</span>
+                            @elseif($stat['today'] === 'absent')
+                                <span class="px-2 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded text-[9px] font-bold uppercase tracking-widest">KELMADI</span>
+                            @else
+                                <span class="px-2 py-1 bg-white/5 text-white/40 border border-white/10 rounded text-[9px] font-bold uppercase tracking-widest">-</span>
+                            @endif
+                        </td>
+                        <td class="py-3 px-4 text-center font-mono text-cyan-400">{{ $stat['weekly_present'] }} kun</td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="text-green-400 font-mono" title="Keldi/Kechikdi">{{ $stat['monthly_present'] }}</span> <span class="text-white/20">/</span> 
+                            <span class="text-red-400 font-mono" title="Kelmadi">{{ $stat['monthly_absent'] }}</span>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-white/30 italic">Davomat ma'lumotlari yo'q</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
     
     <!-- Add Teacher Modal -->
     <div x-show="showAddTeacherModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">

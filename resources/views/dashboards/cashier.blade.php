@@ -89,48 +89,58 @@
                             this.faceIdProgress = 40;
                             
                             video.onloadeddata = () => {
-                                setTimeout(async () => {
-                                    this.faceIdProgress = 70;
-                                    this.faceIdMessage = 'GEMINI AI ORQALI TASDIQLANMOQDA...';
+                                let duration = 30000;
+                                let elapsed = 0;
+                                let interval = setInterval(() => {
+                                    elapsed += 1000;
+                                    this.faceIdProgress = 40 + Math.floor((elapsed / duration) * 30);
                                     
-                                    const frameData = this.captureFrame(video);
-                                    
-                                    try {
-                                        const response = await fetch('{{ route('operator.face_verify') }}', {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                            },
-                                            body: JSON.stringify({ image: frameData })
-                                        });
-                                        const result = await response.json();
+                                    if (elapsed >= duration) {
+                                        clearInterval(interval);
+                                        this.faceIdProgress = 70;
+                                        this.faceIdMessage = 'GEMINI AI ORQALI TASDIQLANMOQDA...';
                                         
-                                        if (result.success) {
-                                            this.faceIdProgress = 100;
-                                            this.faceIdMessage = 'RUXSAT ETILDI: ' + result.message;
-                                            if(window.speakUzbekGlobal) window.speakUzbekGlobal(result.message);
-                                            
-                                            const tracks = stream.getTracks();
-                                            tracks.forEach(track => track.stop());
-                                            
-                                            setTimeout(() => {
-                                                document.getElementById('startShiftForm').submit();
-                                            }, 2500); 
-                                        } else {
-                                            this.faceIdMessage = 'RAD ETILDI: ' + result.message;
-                                            if(window.speakUzbekGlobal) window.speakUzbekGlobal("Kirish rad etildi. " + result.message);
-                                            this.faceIdProgress = 0;
-                                            stream.getTracks().forEach(t => t.stop());
-                                            setTimeout(() => { this.faceIdOverlay = false; }, 3000);
-                                        }
-                                    } catch (e) {
-                                        this.faceIdMessage = 'AI YADROSI BILAN ALOQA UZILDI';
-                                        if(window.speakUzbekGlobal) window.speakUzbekGlobal("Tarmoq yoki yadro bilan aloqa uzildi");
-                                        stream.getTracks().forEach(t => t.stop());
-                                        setTimeout(() => { this.faceIdOverlay = false; }, 2000);
+                                        const frameData = this.captureFrame(video);
+                                        
+                                        (async () => {
+                                            try {
+                                                const response = await fetch('{{ route('operator.face_verify') }}', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                                    },
+                                                    body: JSON.stringify({ image: frameData })
+                                                });
+                                                const result = await response.json();
+                                                
+                                                if (result.success) {
+                                                    this.faceIdProgress = 100;
+                                                    this.faceIdMessage = 'RUXSAT ETILDI: ' + result.message;
+                                                    if(window.speakUzbekGlobal) window.speakUzbekGlobal(result.message);
+                                                    
+                                                    const tracks = stream.getTracks();
+                                                    tracks.forEach(track => track.stop());
+                                                    
+                                                    setTimeout(() => {
+                                                        document.getElementById('startShiftForm').submit();
+                                                    }, 2500); 
+                                                } else {
+                                                    this.faceIdMessage = 'RAD ETILDI: ' + result.message;
+                                                    if(window.speakUzbekGlobal) window.speakUzbekGlobal("Kirish rad etildi. " + result.message);
+                                                    this.faceIdProgress = 0;
+                                                    stream.getTracks().forEach(t => t.stop());
+                                                    setTimeout(() => { this.faceIdOverlay = false; }, 3000);
+                                                }
+                                            } catch (e) {
+                                                this.faceIdMessage = 'AI YADROSI BILAN ALOQA UZILDI';
+                                                if(window.speakUzbekGlobal) window.speakUzbekGlobal("Tarmoq yoki yadro bilan aloqa uzildi");
+                                                stream.getTracks().forEach(t => t.stop());
+                                                setTimeout(() => { this.faceIdOverlay = false; }, 2000);
+                                            }
+                                        })();
                                     }
-                                }, 1500);
+                                }, 1000);
                             };
                         })
                         .catch(err => {

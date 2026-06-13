@@ -112,9 +112,12 @@
 
                     this.progress = 15;
 
-                    // Run progress animation
+                    // Run progress animation (30 seconds)
+                    let duration = 30000;
+                    let elapsed = 0;
                     let interval = setInterval(() => {
-                        this.progress += Math.floor(Math.random() * 8) + 3;
+                        elapsed += 200;
+                        this.progress = 15 + Math.floor((elapsed / duration) * 85); // 15 to 100
 
                         if (this.progress >= 25 && this.progress < 50) {
                             this.scanMessage = this.cameraActive ? 'ANALYZING BIOMETRICS...' : 'ESTABLISHING HANDSHAKE...';
@@ -129,7 +132,7 @@
                             this.scanMessage = 'ACCESS AUTHORIZED';
                         }
 
-                        if (this.progress >= 100) {
+                        if (elapsed >= duration || this.progress >= 100) {
                             this.progress = 100;
                             clearInterval(interval);
 

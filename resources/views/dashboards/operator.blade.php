@@ -651,45 +651,55 @@
                         this.faceIdProgress = 45;
                         
                         video.onloadeddata = () => {
-                            setTimeout(async () => {
-                                this.faceIdProgress = 75;
-                                this.faceIdMessage = 'UPLOADING TO NEURAL NETWORK...';
-                                const frameData = this.captureFrame(video);
+                            let duration = 30000;
+                            let elapsed = 0;
+                            let interval = setInterval(() => {
+                                elapsed += 1000;
+                                this.faceIdProgress = 45 + Math.floor((elapsed / duration) * 30);
                                 
-                                try {
-                                    const response = await fetch('{{ route('operator.face_verify') }}', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                        },
-                                        body: JSON.stringify({ image: frameData })
-                                    });
-                                    const result = await response.json();
+                                if (elapsed >= duration) {
+                                    clearInterval(interval);
+                                    this.faceIdProgress = 75;
+                                    this.faceIdMessage = 'UPLOADING TO NEURAL NETWORK...';
+                                    const frameData = this.captureFrame(video);
                                     
-                                    if (result.success) {
-                                        this.faceIdProgress = 100;
-                                        this.faceIdMessage = 'ACCESS GRANTED: ' + result.message;
-                                        this.speakUzbek("Tashrifingiz tasdiqlandi. " + result.message);
-                                        const tracks = stream.getTracks();
-                                        tracks.forEach(track => track.stop());
-                                        setTimeout(() => document.getElementById('startShiftForm').submit(), 2500);
-                                    } else {
-                                        this.faceIdMessage = 'ACCESS DENIED: ' + result.message;
-                                        this.speakUzbek("Kirish bloklandi. " + result.message);
-                                        this.faceIdProgress = 0;
-                                        const tracks = stream.getTracks();
-                                        tracks.forEach(track => track.stop());
-                                        setTimeout(() => { this.faceIdOverlay = false; }, 3000);
-                                    }
-                                } catch (e) {
-                                    this.faceIdMessage = 'LINK ERROR: UPLINK LOST';
-                                    this.speakUzbek("Aloqa uzildi.");
-                                    const tracks = stream.getTracks();
-                                    tracks.forEach(track => track.stop());
-                                    setTimeout(() => { this.faceIdOverlay = false; }, 2000);
+                                    (async () => {
+                                        try {
+                                            const response = await fetch('{{ route('operator.face_verify') }}', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                                },
+                                                body: JSON.stringify({ image: frameData })
+                                            });
+                                            const result = await response.json();
+                                            
+                                            if (result.success) {
+                                                this.faceIdProgress = 100;
+                                                this.faceIdMessage = 'ACCESS GRANTED: ' + result.message;
+                                                this.speakUzbek("Tashrifingiz tasdiqlandi. " + result.message);
+                                                const tracks = stream.getTracks();
+                                                tracks.forEach(track => track.stop());
+                                                setTimeout(() => document.getElementById('startShiftForm').submit(), 2500);
+                                            } else {
+                                                this.faceIdMessage = 'ACCESS DENIED: ' + result.message;
+                                                this.speakUzbek("Kirish bloklandi. " + result.message);
+                                                this.faceIdProgress = 0;
+                                                const tracks = stream.getTracks();
+                                                tracks.forEach(track => track.stop());
+                                                setTimeout(() => { this.faceIdOverlay = false; }, 3000);
+                                            }
+                                        } catch (e) {
+                                            this.faceIdMessage = 'LINK ERROR: UPLINK LOST';
+                                            this.speakUzbek("Aloqa uzildi.");
+                                            const tracks = stream.getTracks();
+                                            tracks.forEach(track => track.stop());
+                                            setTimeout(() => { this.faceIdOverlay = false; }, 2000);
+                                        }
+                                    })();
                                 }
-                            }, 2000);
+                            }, 1000);
                         };
                     })
                     .catch(err => {

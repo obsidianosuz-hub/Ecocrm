@@ -35,6 +35,9 @@
         <a href="{{ route('admin.academy.rooms.index') }}" class="px-4 py-2 bg-white/5 text-white/60 border border-white/20 hover:bg-white hover:text-black transition-all text-[10px] font-bold uppercase tracking-widest rounded flex items-center gap-2">
             <i class="fa-solid fa-door-open"></i> YANGI XONA
         </a>
+        <button @click="showAttendanceModal = true" class="px-4 py-2 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 hover:bg-yellow-500 hover:text-black transition-all text-[10px] font-bold uppercase tracking-widest rounded flex items-center gap-2">
+            <i class="fa-solid fa-clipboard-check"></i> BAHO VA DAVOMAT
+        </button>
     </div>
 
     <!-- Top Stats Grid -->
@@ -101,17 +104,22 @@
                 </div>
                 <button class="btn-ios text-[10px] py-1 px-3 border border-white/10 hover:bg-white/5">ARCHIVE <i class="fa-solid fa-chevron-right text-[8px] ml-1"></i></button>
             </div>
-            <div class="flex-1 overflow-y-auto slim-scroll space-y-3">
+            <div class="flex-1 overflow-y-auto slim-scroll space-y-3 pr-2">
                 @forelse($activeGroups as $group)
-                <div class="p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-purple-500/30 transition-all">
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="font-bold text-sm text-purple-400">{{ $group->name }}</div>
-                        <div class="text-[10px] font-bold opacity-60 uppercase">{{ $group->course->name ?? 'N/A' }}</div>
+                <div class="p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-purple-500/30 transition-all flex items-center gap-3">
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="font-bold text-sm text-purple-400">{{ $group->name }}</div>
+                            <div class="text-[10px] font-bold opacity-60 uppercase">{{ $group->course->name ?? 'N/A' }}</div>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px] opacity-60">
+                            <span><i class="fa-solid fa-chalkboard-user mr-1"></i> {{ $group->teacher->name ?? 'N/A' }}</span>
+                            <span><i class="fa-solid fa-door-open mr-1"></i> {{ $group->room->name ?? 'N/A' }}</span>
+                        </div>
                     </div>
-                    <div class="flex justify-between items-center text-[10px] opacity-60">
-                        <span><i class="fa-solid fa-chalkboard-user mr-1"></i> {{ $group->teacher->name ?? 'N/A' }}</span>
-                        <span><i class="fa-solid fa-door-open mr-1"></i> {{ $group->room->name ?? 'N/A' }}</span>
-                    </div>
+                    <a href="{{ route('admin.academy.attendance.students', $group->id) }}" class="w-8 h-8 rounded-full bg-yellow-500/10 text-yellow-400 flex items-center justify-center hover:bg-yellow-500 hover:text-black transition-all shrink-0 shadow-[0_0_10px_rgba(234,179,8,0.2)]" title="Davomat va Baho">
+                        <i class="fa-solid fa-clipboard-check text-xs"></i>
+                    </a>
                 </div>
                 @empty
                 <div class="flex flex-col items-center justify-center h-full opacity-30 italic">
@@ -259,12 +267,35 @@
             </form>
         </div>
     </div>
+
+    <!-- Select Group for Attendance Modal -->
+    <div x-show="showAttendanceModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div @click.outside="showAttendanceModal = false" class="glass-panel w-full max-w-md p-6 relative border border-yellow-500/30 shadow-[0_0_50px_rgba(234,179,8,0.1)]">
+            <button @click="showAttendanceModal = false" class="absolute top-4 right-4 text-white/50 hover:text-white"><i class="fa-solid fa-times"></i></button>
+            <h2 class="text-xl font-bold text-yellow-400 mb-6 uppercase tracking-widest"><i class="fa-solid fa-clipboard-check mr-2"></i> Davomat va Baho</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] uppercase text-white/50 tracking-widest mb-1 block">Guruhni Tanlang</label>
+                    <select x-model="selectedGroupId" class="w-full bg-black border border-white/10 rounded p-2 text-xs text-white focus:border-yellow-400 outline-none transition-all">
+                        <option value="">-- Guruh --</option>
+                        @foreach($activeGroups as $group)
+                            <option value="{{ $group->id }}">{{ $group->name }} ({{ $group->teacher->name ?? 'O\'qituvchisiz' }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <button @click="if(selectedGroupId) window.location.href='/academy/attendance/'+selectedGroupId" class="w-full py-3 mt-4 bg-yellow-500/20 text-yellow-400 border border-yellow-500 hover:bg-yellow-500 hover:text-black font-bold uppercase tracking-widest transition-all rounded text-xs shadow-[0_0_15px_rgba(234,179,8,0.3)]">DAVOM ETISH</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('academyHub', () => ({
             showAddTeacherModal: false,
+            showAttendanceModal: false,
+            selectedGroupId: '',
             init() {
                 console.log('Academy Module initialized');
             }

@@ -34,6 +34,7 @@ class AttendanceController extends Controller
             'attendances.*.student_id' => 'required|exists:students,id',
             'attendances.*.status' => 'required|in:present,absent,late',
             'attendances.*.late_minutes' => 'nullable|integer',
+            'attendances.*.grade' => 'nullable|integer|min:1|max:5',
         ]);
 
         $groupId = $request->group_id;
@@ -69,6 +70,22 @@ class AttendanceController extends Controller
                     'late_minutes' => $attData['late_minutes'] ?? 0,
                 ]
             );
+
+            // Handle Grade if provided
+            if (isset($attData['grade']) && $attData['grade'] !== null) {
+                \App\Models\Grade::updateOrCreate(
+                    [
+                        'group_id' => $groupId,
+                        'student_id' => $attData['student_id'],
+                        'date' => $date,
+                    ],
+                    [
+                        'company_id' => auth()->user()->company_id,
+                        'teacher_id' => auth()->id(), // Admin or teacher taking attendance
+                        'grade' => $attData['grade'],
+                    ]
+                );
+            }
 
             // Notify via Telegram for all statuses
             $this->sendTelegramNotification($group, $attData, $attendance);

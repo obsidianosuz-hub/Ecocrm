@@ -39,15 +39,20 @@
                     <button @click="mark('{{ $student->id }}', 'late')" :class="getStatusClass('{{ $student->id }}', 'late')" class="px-4 py-2 text-[9px] font-bold uppercase tracking-widest border transition-all">KECHIKDI</button>
                 </div>
                 
-                <div x-show="attendances['{{ $student->id }}'] == 'late'" class="w-24 shrink-0" x-transition>
+                <div x-show="attendances['{{ $student->id }}'] == 'late'" class="w-16 shrink-0" x-transition>
                     <input type="number" x-model="lateMinutes['{{ $student->id }}']" placeholder="Min" class="w-full bg-black border border-white/10 rounded p-1 text-xs text-center text-yellow-400">
+                </div>
+
+                <!-- Grade Input -->
+                <div class="w-16 shrink-0">
+                    <input type="number" min="1" max="5" x-model="grades['{{ $student->id }}']" placeholder="Baho" class="w-full bg-black border border-cyan-500/20 focus:border-cyan-400 rounded p-1 text-xs text-center text-cyan-400 outline-none transition-all">
                 </div>
             </div>
             @endforeach
         </div>
 
         <div class="mt-10 pt-6 border-t border-white/5">
-            <button @click="saveAttendance()" class="w-full py-4 bg-green-600/20 text-green-400 border border-green-500 font-bold text-xs uppercase tracking-[0.3em] hover:bg-green-600 hover:text-white transition-all shadow-[0_0_20px_rgba(34,197,94,0.2)]">DAVOMATNI SAQLASH</button>
+            <button @click="saveAttendance()" class="w-full py-4 bg-green-600/20 text-green-400 border border-green-500 font-bold text-xs uppercase tracking-[0.3em] hover:bg-green-600 hover:text-white transition-all shadow-[0_0_20px_rgba(34,197,94,0.2)]">DAVOMAT VA BAHOLARNI SAQLASH</button>
         </div>
     </div>
 </div>
@@ -58,6 +63,7 @@
             groupId: '{{ $group->id }}',
             attendances: {},
             lateMinutes: {},
+            grades: {},
             
             mark(studentId, status) {
                 this.attendances[studentId] = status;
@@ -79,7 +85,8 @@
                     batch.push({
                         student_id: id,
                         status: this.attendances[id],
-                        late_minutes: this.lateMinutes[id] || 0
+                        late_minutes: this.lateMinutes[id] || 0,
+                        grade: this.grades[id] || null
                     });
                 });
                 

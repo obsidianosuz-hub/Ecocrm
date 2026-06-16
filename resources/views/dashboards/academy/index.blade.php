@@ -117,9 +117,9 @@
                             <span><i class="fa-solid fa-door-open mr-1"></i> {{ $group->room->name ?? 'N/A' }}</span>
                         </div>
                     </div>
-                    <a href="{{ route('admin.academy.attendance.students', $group->id) }}" class="w-8 h-8 rounded-full bg-yellow-500/10 text-yellow-400 flex items-center justify-center hover:bg-yellow-500 hover:text-black transition-all shrink-0 shadow-[0_0_10px_rgba(234,179,8,0.2)]" title="Davomat va Baho">
+                    <button @click="selectedGroupId = '{{ $group->id }}'; showAttendanceModal = true; fetchStudents()" class="w-8 h-8 rounded-full bg-yellow-500/10 text-yellow-400 flex items-center justify-center hover:bg-yellow-500 hover:text-black transition-all shrink-0 shadow-[0_0_10px_rgba(234,179,8,0.2)]" title="Davomat va Baho">
                         <i class="fa-solid fa-clipboard-check text-xs"></i>
-                    </a>
+                    </button>
                 </div>
                 @empty
                 <div class="flex flex-col items-center justify-center h-full opacity-30 italic">
@@ -270,11 +270,12 @@
 
     <!-- Select Group for Attendance Modal -->
     <div x-show="showAttendanceModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-        <div @click.outside="showAttendanceModal = false" class="glass-panel w-full max-w-md p-6 relative border border-yellow-500/30 shadow-[0_0_50px_rgba(234,179,8,0.1)]">
-            <button @click="showAttendanceModal = false" class="absolute top-4 right-4 text-white/50 hover:text-white"><i class="fa-solid fa-times"></i></button>
-            <h2 class="text-xl font-bold text-yellow-400 mb-6 uppercase tracking-widest"><i class="fa-solid fa-clipboard-check mr-2"></i> Davomat va Baho</h2>
+        <div @click.outside="if(step === 1) showAttendanceModal = false" :class="step === 2 ? 'max-w-4xl' : 'max-w-md'" class="glass-panel w-full p-6 relative border border-yellow-500/30 shadow-[0_0_50px_rgba(234,179,8,0.1)] transition-all duration-300">
+            <button @click="showAttendanceModal = false; step = 1; students = []" class="absolute top-4 right-4 text-white/50 hover:text-white"><i class="fa-solid fa-times"></i></button>
+            <h2 class="text-xl font-bold text-yellow-400 mb-6 uppercase tracking-widest"><i class="fa-solid fa-clipboard-check mr-2"></i> <span x-text="step === 1 ? 'Davomat va Baho' : 'Davomat: ' + selectedGroupName"></span></h2>
             
-            <div class="space-y-4">
+            <!-- Step 1: Select Group -->
+            <div x-show="step === 1" class="space-y-4">
                 <div>
                     <label class="text-[10px] uppercase text-white/50 tracking-widest mb-1 block">Guruhni Tanlang</label>
                     <select x-model="selectedGroupId" class="w-full bg-black border border-white/10 rounded p-2 text-xs text-white focus:border-yellow-400 outline-none transition-all">
@@ -284,7 +285,42 @@
                         @endforeach
                     </select>
                 </div>
-                <button @click="if(selectedGroupId) window.location.href='/academy/attendance/'+selectedGroupId" class="w-full py-3 mt-4 bg-yellow-500/20 text-yellow-400 border border-yellow-500 hover:bg-yellow-500 hover:text-black font-bold uppercase tracking-widest transition-all rounded text-xs shadow-[0_0_15px_rgba(234,179,8,0.3)]">DAVOM ETISH</button>
+                <button @click="fetchStudents()" :disabled="!selectedGroupId" class="w-full py-3 mt-4 bg-yellow-500/20 text-yellow-400 border border-yellow-500 hover:bg-yellow-500 hover:text-black disabled:opacity-50 disabled:hover:bg-yellow-500/20 disabled:hover:text-yellow-400 font-bold uppercase tracking-widest transition-all rounded text-xs shadow-[0_0_15px_rgba(234,179,8,0.3)]">DAVOM ETISH</button>
+            </div>
+
+            <!-- Step 2: Mark Attendance -->
+            <div x-show="step === 2" class="space-y-4 max-h-[70vh] overflow-y-auto slim-scroll pr-2">
+                <template x-for="student in students" :key="student.id">
+                    <div class="bg-white/5 border border-white/10 p-4 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4 mb-3">
+                        <div class="flex items-center gap-4 w-full md:w-auto">
+                            <div class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-400 border border-green-500/20 font-bold" x-text="student.name.substring(0,1)"></div>
+                            <div>
+                                <h4 class="text-sm font-bold text-white" x-text="student.name"></h4>
+                                <p class="text-[10px] font-mono text-white/40" x-text="student.phone"></p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-1">
+                            <button @click="mark(student.id, 'present')" :class="getStatusClass(student.id, 'present')" class="px-4 py-2 text-[9px] font-bold uppercase tracking-widest border transition-all">KELDI</button>
+                            <button @click="mark(student.id, 'absent')" :class="getStatusClass(student.id, 'absent')" class="px-4 py-2 text-[9px] font-bold uppercase tracking-widest border transition-all">KELMADI</button>
+                            <button @click="mark(student.id, 'late')" :class="getStatusClass(student.id, 'late')" class="px-4 py-2 text-[9px] font-bold uppercase tracking-widest border transition-all">KECHIKDI</button>
+                        </div>
+                        
+                        <div x-show="attendances[student.id] == 'late'" class="w-16 shrink-0" x-transition>
+                            <input type="number" x-model="lateMinutes[student.id]" placeholder="Min" class="w-full bg-black border border-white/10 rounded p-1 text-xs text-center text-yellow-400">
+                        </div>
+
+                        <!-- Grade Input -->
+                        <div class="w-16 shrink-0">
+                            <input type="number" min="1" max="5" x-model="grades[student.id]" placeholder="Baho" class="w-full bg-black border border-cyan-500/20 focus:border-cyan-400 rounded p-1 text-xs text-center text-cyan-400 outline-none transition-all">
+                        </div>
+                    </div>
+                </template>
+
+                <div class="mt-8 pt-6 border-t border-white/5 flex gap-4">
+                    <button @click="step = 1; students = []" class="px-6 py-4 bg-white/5 text-white border border-white/10 font-bold text-xs uppercase tracking-widest hover:bg-white hover:text-black transition-all rounded">ORQAGA</button>
+                    <button @click="saveAttendance()" class="flex-1 py-4 bg-green-600/20 text-green-400 border border-green-500 font-bold text-xs uppercase tracking-[0.3em] hover:bg-green-600 hover:text-white transition-all shadow-[0_0_20px_rgba(34,197,94,0.2)] rounded">SAQLASH</button>
+                </div>
             </div>
         </div>
     </div>
@@ -295,9 +331,93 @@
         Alpine.data('academyHub', () => ({
             showAddTeacherModal: false,
             showAttendanceModal: false,
+            step: 1,
             selectedGroupId: '',
+            selectedGroupName: '',
+            students: [],
+            attendances: {},
+            lateMinutes: {},
+            grades: {},
+
             init() {
                 console.log('Academy Module initialized');
+            },
+
+            fetchStudents() {
+                if (!this.selectedGroupId) return;
+                
+                fetch('/academy/attendance/' + this.selectedGroupId, {
+                    headers: { 'Accept': 'application/json' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    this.students = data.students || [];
+                    this.selectedGroupName = data.group || '';
+                    this.attendances = {};
+                    this.lateMinutes = {};
+                    this.grades = {};
+                    this.step = 2;
+                })
+                .catch(err => {
+                    alert('Xatolik yuz berdi!');
+                    console.error(err);
+                });
+            },
+
+            mark(studentId, status) {
+                this.attendances[studentId] = status;
+            },
+            
+            getStatusClass(studentId, status) {
+                const current = this.attendances[studentId];
+                if (current === status) {
+                    if (status === 'present') return 'bg-green-500/20 border-green-500 text-green-400 rounded';
+                    if (status === 'absent') return 'bg-red-500/20 border-red-500 text-red-400 rounded';
+                    if (status === 'late') return 'bg-yellow-500/20 border-yellow-500 text-yellow-400 rounded';
+                }
+                return 'bg-white/5 border-white/10 text-white/30 hover:border-white/30 rounded';
+            },
+
+            saveAttendance() {
+                const batch = [];
+                Object.keys(this.attendances).forEach(id => {
+                    batch.push({
+                        student_id: id,
+                        status: this.attendances[id],
+                        late_minutes: this.lateMinutes[id] || 0,
+                        grade: this.grades[id] || null
+                    });
+                });
+                
+                if (batch.length < this.students.length) {
+                    if (!confirm("Barcha o'quvchilar belgilanmagan. Davom etaveraylikmi?")) return;
+                }
+
+                fetch('{{ route('admin.academy.attendance.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        group_id: this.selectedGroupId,
+                        attendances: batch
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.reload(); // Reload to update dashboard stats
+                    } else {
+                        alert(data.message || 'Xatolik yuz berdi!');
+                    }
+                })
+                .catch(err => {
+                    alert('Xatolik yuz berdi! Serverga ulanib bo\'lmadi.');
+                    console.error(err);
+                });
             }
         }));
     });
